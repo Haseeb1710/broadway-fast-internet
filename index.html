@@ -203,19 +203,6 @@ tailwind.config = {
     font-variant-numeric: tabular-nums;
   }
 
-  /* Mega menu */
-  .mega-menu {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-8px);
-    transition: all 0.25s ease;
-  }
-  .mega-menu.open {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-  }
-
   /* Stepper */
   .step-dot {
     width: 10px; height: 10px;
@@ -506,10 +493,7 @@ tailwind.config = {
       <div class="hidden md:flex items-center gap-7 text-sm">
         <a href="index.html" class="text-cyanAero">Home</a>
         <a href="services.html" class="hover:text-cyanAero transition">Services &amp; Prices</a>
-        <button id="sat-menu-trigger" class="flex items-center gap-1 hover:text-cyanAero transition">
-          Plans
-          <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
-        </button>
+        <a href="#costing" class="hover:text-cyanAero transition">Plans</a>
         <a href="#heritage" class="hover:text-cyanAero transition">About</a>
         <a href="#footer-contact" class="hover:text-cyanAero transition">Contact</a>
       </div>
@@ -529,84 +513,6 @@ tailwind.config = {
     </div>
   </div>
 
-  <!-- Mega Menu -->
-  <div id="mega-menu" class="mega-menu absolute left-0 w-full glass-strong hairline-b hairline-t">
-    <div class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- AT&T Internet Plans -->
-      <div>
-        <div class="font-mono text-xs text-white/40 mb-5 tracking-widest">AT&amp;T FIBER INTERNET</div>
-        <div class="space-y-3">
-          <a href="services.html#plan-300" data-platform="frameS" class="platform-card glass p-4 rounded-lg hairline cursor-pointer hover:border-cyanAero transition block">
-            <div class="flex items-center justify-between">
-              <div class="font-display font-bold text-lg">INTERNET 300</div>
-              <div class="font-mono text-xs text-cyanAero">$50/mo</div>
-            </div>
-            <div class="font-mono text-xs text-white/60 mt-1">300 MBPS · STREAM &amp; GAME</div>
-          </a>
-          <a href="services.html#plan-500" data-platform="frameL" class="platform-card glass p-4 rounded-lg hairline cursor-pointer hover:border-cyanAero transition block">
-            <div class="flex items-center justify-between">
-              <div class="font-display font-bold text-lg">INTERNET 500</div>
-              <div class="font-mono text-xs text-cyanAero">$60/mo</div>
-            </div>
-            <div class="font-mono text-xs text-white/60 mt-1">500 MBPS · LOW-LAG GAMING</div>
-          </a>
-          <a href="services.html#plan-1000" data-platform="frameMax" class="platform-card glass p-4 rounded-lg hairline cursor-pointer hover:border-cyanAero transition block">
-            <div class="flex items-center justify-between">
-              <div class="font-display font-bold text-lg">INTERNET 1 GIG</div>
-              <div class="font-mono text-xs text-cyanAero">$70/mo</div>
-            </div>
-            <div class="font-mono text-xs text-white/60 mt-1">1 GBPS · WORK &amp; PRO GAMING</div>
-          </a>
-          <a href="services.html#plan-5000" data-platform="frameMax" class="platform-card glass p-4 rounded-lg hairline cursor-pointer hover:border-cyanAero transition block">
-            <div class="flex items-center justify-between">
-              <div class="font-display font-bold text-lg">INTERNET 5 GIG</div>
-              <div class="font-mono text-xs text-cyanAero">$110/mo</div>
-            </div>
-            <div class="font-mono text-xs text-white/60 mt-1">5 GBPS · MAX PERFORMANCE</div>
-          </a>
-        </div>
-      </div>
-      <!-- Wireless -->
-      <div>
-        <div class="font-mono text-xs text-white/40 mb-5 tracking-widest">AT&amp;T WIRELESS</div>
-        <ul class="space-y-3">
-          <li class="flex items-center justify-between hover:text-cyanAero cursor-pointer transition">
-            <span>Unlimited Starter</span>
-            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-          </li>
-          <li class="flex items-center justify-between hover:text-cyanAero cursor-pointer transition">
-            <span>Unlimited Extra</span>
-            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-          </li>
-          <li class="flex items-center justify-between hover:text-cyanAero cursor-pointer transition">
-            <span>Unlimited Premium</span>
-            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-          </li>
-          <li class="flex items-center justify-between hover:text-cyanAero cursor-pointer transition">
-            <span>Family / Multi-Line</span>
-            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-          </li>
-          <li class="flex items-center justify-between hover:text-cyanAero cursor-pointer transition">
-            <span>Prepaid / No Credit Check</span>
-            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-          </li>
-        </ul>
-      </div>
-      <!-- Services -->
-      <div>
-        <div class="font-mono text-xs text-white/40 mb-5 tracking-widest">OUR SERVICES</div>
-        <ul class="grid grid-cols-1 gap-y-2 text-sm">
-          <li class="hover:text-cyanAero cursor-pointer">Availability Check</li>
-          <li class="hover:text-cyanAero cursor-pointer">Plan Comparison</li>
-          <li class="hover:text-cyanAero cursor-pointer">Service Activation</li>
-          <li class="hover:text-cyanAero cursor-pointer">Bundle Optimization</li>
-          <li class="hover:text-cyanAero cursor-pointer">Equipment Setup</li>
-          <li class="hover:text-cyanAero cursor-pointer">Billing Support</li>
-          <li class="hover:text-cyanAero cursor-pointer">Line Transfers</li>
-        </ul>
-      </div>
-    </div>
-  </div>
 </nav>
 
 <!-- Sticky Section Progress Bar -->
@@ -2176,39 +2082,7 @@ function animate() {
 }
 animate();
 
-/* =============================================================
-   UI: MEGA MENU
-   ============================================================= */
-const megaMenu = document.getElementById('mega-menu');
-const satTrigger = document.getElementById('sat-menu-trigger');
-let megaOpen = false;
-satTrigger.addEventListener('click', (e) => {
-  e.stopPropagation();
-  megaOpen = !megaOpen;
-  megaMenu.classList.toggle('open', megaOpen);
-});
-document.addEventListener('click', (e) => {
-  if (megaOpen && !megaMenu.contains(e.target) && !satTrigger.contains(e.target)) {
-    megaOpen = false;
-    megaMenu.classList.remove('open');
-  }
-});
-
-// Platform scale binding
-const scaleMap = { frameS: 0.85, frameL: 1.1, frameMax: 1.35 };
-let currentPlatform = 'FRAME S';
-document.querySelectorAll('.platform-card').forEach(card => {
-  card.addEventListener('click', () => {
-    const key = card.dataset.platform;
-    satTargetScale = scaleMap[key];
-    currentPlatform = card.querySelector('.font-display').textContent;
-    document.getElementById('mod-platform').textContent = currentPlatform;
-    document.querySelectorAll('.platform-card').forEach(c => c.style.borderColor = '');
-    card.style.borderColor = '#4A6EFF';
-    megaOpen = false;
-    megaMenu.classList.remove('open');
-  });
-});
+/* Mega menu removed — Plans link now scrolls to #costing directly. */
 
 /* =============================================================
    UI: APPLICATION CONFIGURATOR
