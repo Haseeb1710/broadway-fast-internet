@@ -62,19 +62,20 @@ tailwind.config = {
       radial-gradient(ellipse at 50% 50%, rgba(10,15,40,0.5), transparent 70%);
   }
   html[data-theme="light"] {
+    /* Light mode: only the page background changes. All other tokens keep dark-mode values. */
     --bg: #f4f6fc;
-    --text: #0a0e1a;
-    --glass-bg: rgba(255, 255, 255, 0.78);
-    --glass-strong-bg: rgba(255, 255, 255, 0.92);
-    --border: rgba(18,34,157,0.14);
-    --border-strong: rgba(18,34,157,0.2);
     --scroll-track: #e5e8f0;
     --scroll-thumb: #c4cad9;
-    --pill-bg: rgba(255,255,255,0.75);
+    --text: #E5E7EB;
+    --glass-bg: rgba(14, 16, 21, 0.65);
+    --glass-strong-bg: rgba(14, 16, 21, 0.9);
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.1);
+    --pill-bg: rgba(14,16,21,0.6);
     --aurora:
-      radial-gradient(ellipse at 20% 20%, rgba(74,110,255,0.18), transparent 55%),
-      radial-gradient(ellipse at 80% 80%, rgba(18,34,157,0.1), transparent 55%),
-      radial-gradient(ellipse at 50% 50%, rgba(240,245,255,0.6), transparent 70%);
+      radial-gradient(ellipse at 20% 20%, rgba(18,34,157,0.25), transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(74,110,255,0.18), transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(10,15,40,0.5), transparent 70%);
   }
 
   html, body {
@@ -128,76 +129,19 @@ tailwind.config = {
   }
   main, nav, footer { position: relative; z-index: 1; }
 
-  /* ===== LIGHT THEME TAILWIND OVERRIDES ===== */
-  html[data-theme="light"] body { background: var(--bg); color: var(--text); }
-  html[data-theme="light"] .text-white { color: #0a0e1a !important; }
-  html[data-theme="light"] .text-white\/90 { color: rgba(10,14,26,0.9) !important; }
-  html[data-theme="light"] .text-white\/80 { color: rgba(10,14,26,0.78) !important; }
-  html[data-theme="light"] .text-white\/70 { color: rgba(10,14,26,0.72) !important; }
-  html[data-theme="light"] .text-white\/60 { color: rgba(10,14,26,0.62) !important; }
-  html[data-theme="light"] .text-white\/50 { color: rgba(10,14,26,0.52) !important; }
-  html[data-theme="light"] .text-white\/40 { color: rgba(10,14,26,0.42) !important; }
-  html[data-theme="light"] .text-white\/30 { color: rgba(10,14,26,0.32) !important; }
-  html[data-theme="light"] .text-obsidian { color: #ffffff !important; }
-  html[data-theme="light"] .bg-black\/40 { background-color: rgba(255,255,255,0.7) !important; }
-  html[data-theme="light"] .bg-white\/5 { background-color: rgba(18,34,157,0.06) !important; }
-  html[data-theme="light"] .border-white\/10 { border-color: rgba(18,34,157,0.14) !important; }
-  html[data-theme="light"] .border-white\/5 { border-color: rgba(18,34,157,0.08) !important; }
-  /* Dark gradient CTA cards keep their colorful bg; only tweak children if needed */
-  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white,
-  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/80,
-  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/70,
-  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/60 { color: #ffffff !important; }
-  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/80 { color: rgba(255,255,255,0.8) !important; }
-  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/70 { color: rgba(255,255,255,0.7) !important; }
-  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/60 { color: rgba(255,255,255,0.6) !important; }
-  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/40 { color: rgba(255,255,255,0.5) !important; }
-  /* Dark gradient wrappers: keep nested glass cards dark so inherited white text stays readable */
-  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .glass,
-  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .glass-strong {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.18) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
+  /* ===== LIGHT MODE: only the page background changes ===== */
+  html[data-theme="light"] body { background: var(--bg); }
 
-  /* ===== BROADWAY LOGO (theme-aware color) ===== */
+  /* ===== BROADWAY LOGO (text wordmark) ===== */
   .broadway-logo { color: #4A6EFF; transition: color 0.3s ease; }
-  html[data-theme="light"] .broadway-logo { color: #12229d; }
 
-  /* ===== LIGHT-MODE BUTTON FIXES ===== */
-  html[data-theme="light"] a.bg-brand,
-  html[data-theme="light"] button.bg-brand,
-  html[data-theme="light"] a.bg-brand *,
-  html[data-theme="light"] button.bg-brand * {
-    color: #ffffff !important;
-  }
-  html[data-theme="light"] a.bg-cyanAero.text-obsidian,
-  html[data-theme="light"] button.bg-cyanAero.text-obsidian,
-  html[data-theme="light"] a.bg-cyanAero.text-obsidian *,
-  html[data-theme="light"] button.bg-cyanAero.text-obsidian * {
-    color: #050507 !important;
-  }
-  html[data-theme="light"] a.hairline.rounded-full,
-  html[data-theme="light"] button.hairline.rounded-full {
-    background-color: rgba(226, 232, 240, 0.6);
-  }
-  html[data-theme="light"] a.hairline.rounded-full:hover,
-  html[data-theme="light"] button.hairline.rounded-full:hover {
-    background-color: rgba(203, 213, 225, 0.85);
-    border-color: rgba(18, 34, 157, 0.3);
-  }
-
-  /* ===== BROADWAY LOGO IMAGE (adapts per theme) ===== */
+  /* ===== BROADWAY LOGO IMAGE =====
+     Nav + footer stay dark on both themes, so the invert treatment works for both:
+     white image bg → black (blends into dark panels), deep navy artwork → bright blue. */
   .broadway-img {
     transition: filter 0.3s ease;
     display: block;
-  }
-  html[data-theme="dark"] .broadway-img {
     filter: invert(1) hue-rotate(180deg) brightness(1.05) saturate(1.1);
-  }
-  html[data-theme="light"] .broadway-img {
-    mix-blend-mode: multiply;
   }
 
   /* ===== THEME TOGGLE BUTTON ===== */
