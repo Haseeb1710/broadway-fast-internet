@@ -152,6 +152,14 @@ tailwind.config = {
   html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/70 { color: rgba(255,255,255,0.7) !important; }
   html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/60 { color: rgba(255,255,255,0.6) !important; }
   html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/40 { color: rgba(255,255,255,0.5) !important; }
+  /* Dark gradient wrappers: keep nested glass cards dark so inherited white text stays readable */
+  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .glass,
+  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .glass-strong {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 
   /* ===== BROADWAY LOGO (theme-aware color) ===== */
   .broadway-logo { color: #4A6EFF; transition: color 0.3s ease; }
