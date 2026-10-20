@@ -1319,79 +1319,6 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- Build your bundle control panel -->
-    <div class="glass rounded-2xl p-8">
-      <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
-        <div>
-          <div class="font-display font-bold text-2xl uppercase">Build Your <span class="text-cyanAero">PERFECT</span> Bundle</div>
-          <div class="text-white/60 text-sm mt-1">Live price estimator — Internet + Wireless + add-ons</div>
-        </div>
-        <div class="font-mono text-xs text-cyanAero flex items-center gap-2">
-          <span class="glow-dot pulse-dot"></span>
-          LIVE RATE CARD
-        </div>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-10">
-        <!-- Sliders -->
-        <div class="space-y-6">
-          <div>
-            <div class="flex items-center justify-between mb-2 font-mono text-xs">
-              <span class="text-white/60 tracking-widest">INTERNET SPEED</span>
-              <span class="text-cyanAero" id="charge-val">4.0 A</span>
-            </div>
-            <input id="charge-slider" type="range" min="1" max="10" value="4" step="0.1" />
-          </div>
-          <div>
-            <div class="flex items-center justify-between mb-2 font-mono text-xs">
-              <span class="text-white/60 tracking-widest">WIRELESS LINES</span>
-              <span class="text-cyanAero" id="dod-val">30%</span>
-            </div>
-            <input id="dod-slider" type="range" min="10" max="60" value="30" />
-          </div>
-          <div>
-            <div class="flex items-center justify-between mb-2 font-mono text-xs">
-              <span class="text-white/60 tracking-widest">DATA PER LINE</span>
-              <span class="text-cyanAero" id="data-val">100 Mbps</span>
-            </div>
-            <input id="data-slider" type="range" min="10" max="500" value="100" />
-          </div>
-          <div>
-            <div class="flex items-center justify-between mb-2 font-mono text-xs">
-              <span class="text-white/60 tracking-widest">PROTECTION / ADD-ONS</span>
-              <span class="text-cyanAero" id="tx-val">30 dBm</span>
-            </div>
-            <input id="tx-slider" type="range" min="10" max="50" value="30" />
-          </div>
-        </div>
-
-        <!-- Readout + wireframe toggle -->
-        <div class="space-y-4">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="hairline rounded-lg p-4">
-              <div class="font-mono text-[10px] text-white/40 tracking-widest">PANEL EFFICIENCY</div>
-              <div class="font-display font-bold text-2xl text-cyanAero" id="eff-val">31.2%</div>
-            </div>
-            <div class="hairline rounded-lg p-4">
-              <div class="font-mono text-[10px] text-white/40 tracking-widest">BUNDLE DISCOUNT</div>
-              <div class="font-display font-bold text-2xl text-cyanAero" id="link-val">+9.4 dB</div>
-            </div>
-            <div class="hairline rounded-lg p-4">
-              <div class="font-mono text-[10px] text-white/40 tracking-widest">INSTALL TIME</div>
-              <div class="font-display font-bold text-2xl text-cyanAero" id="thermal-val">+28°C</div>
-            </div>
-            <div class="hairline rounded-lg p-4">
-              <div class="font-mono text-[10px] text-white/40 tracking-widest">EST. SETUP FEE</div>
-              <div class="font-display font-bold text-2xl text-cyanAero" id="dl-val">38.4 GB</div>
-            </div>
-          </div>
-          <button id="xray-toggle-2" class="w-full hairline rounded-xl py-4 font-mono text-sm tracking-widest hover:border-cyanAero transition flex items-center justify-center gap-2">
-            <i data-lucide="scan-eye" class="w-4 h-4"></i>
-            INSPECT NETWORK LAYERS (3D X-RAY)
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -1945,14 +1872,13 @@ function setXray(enabled) {
   } else {
     originalMats.forEach(({ mesh, mat }) => mesh.material = mat);
   }
-  document.querySelectorAll('#xray-toggle, #xray-toggle-2').forEach(el => {
+  document.querySelectorAll('#xray-toggle').forEach(el => {
     el.classList.toggle('border-cyanAero', enabled);
     el.classList.toggle('text-cyanAero', enabled);
   });
 }
 
 document.getElementById('xray-toggle').addEventListener('click', () => setXray(!xray));
-document.getElementById('xray-toggle-2').addEventListener('click', () => setXray(!xray));
 
 /* =============================================================
    INTERACTIVITY: MOUSE DRAG, PARALLAX, SCROLL CHOREOGRAPHY
@@ -2446,49 +2372,7 @@ setInterval(() => {
 }, 500);
 chartSolar.draw(); chartBatt.draw(); chartAtt.draw();
 
-/* =============================================================
-   TECHNOLOGY SLIDERS
-   ============================================================= */
-const charge = document.getElementById('charge-slider');
-const dod = document.getElementById('dod-slider');
-const data = document.getElementById('data-slider');
-const tx = document.getElementById('tx-slider');
-
-function updateTech() {
-  const c = parseFloat(charge.value);
-  const d = parseFloat(dod.value);
-  const dr = parseFloat(data.value);
-  const t = parseFloat(tx.value);
-
-  document.getElementById('charge-val').textContent = c.toFixed(1) + ' A';
-  document.getElementById('dod-val').textContent = d + '%';
-  document.getElementById('data-val').textContent = dr + ' Mbps';
-  document.getElementById('tx-val').textContent = t + ' dBm';
-
-  // Derived readouts
-  document.getElementById('eff-val').textContent = (28 + c * 0.75).toFixed(1) + '%';
-  document.getElementById('link-val').textContent = '+' + (t * 0.3 + 1).toFixed(1) + ' dB';
-  document.getElementById('thermal-val').textContent = '+' + Math.round(20 + c * 2) + '°C';
-  document.getElementById('dl-val').textContent = (dr * 0.38).toFixed(1) + ' GB';
-
-  // Visual: brighten solar wings
-  const intensity = 0.2 + (c / 10) * 0.6;
-  leftWing.children.forEach(ch => {
-    if (ch.children) ch.children.forEach(x => {
-      if (x.material && x.material.emissiveIntensity !== undefined) x.material.emissiveIntensity = intensity;
-    });
-  });
-  rightWing.children.forEach(ch => {
-    if (ch.children) ch.children.forEach(x => {
-      if (x.material && x.material.emissiveIntensity !== undefined) x.material.emissiveIntensity = intensity;
-    });
-  });
-}
-charge.addEventListener('input', updateTech);
-dod.addEventListener('input', updateTech);
-data.addEventListener('input', updateTech);
-tx.addEventListener('input', updateTech);
-updateTech();
+/* Technology sliders removed — bundle estimator UI is no longer in the DOM. */
 
 /* =============================================================
    CONSTELLATION SLIDER & ODOMETER
