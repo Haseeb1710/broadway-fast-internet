@@ -144,6 +144,43 @@ tailwind.config = {
     filter: invert(1) hue-rotate(180deg) brightness(1.05) saturate(1.1);
   }
 
+  /* ===== QUOTE MODAL ===== */
+  .quote-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(5,5,7,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .quote-modal-backdrop.open { display: flex; }
+  .quote-modal-dialog {
+    max-width: 560px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .quote-modal-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(14,16,21,0.6);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.2s ease;
+  }
+  .quote-modal-close:hover { border-color: #4A6EFF; color: #4A6EFF; }
+
   /* ===== THEME TOGGLE BUTTON ===== */
   .theme-toggle {
     width: 36px; height: 36px;
@@ -188,10 +225,10 @@ tailwind.config = {
       <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle light / dark theme">
         <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
       </button>
-      <a href="tel:6462985043" class="bg-brand text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-brandBright transition flex items-center gap-2">
-        Call now
+      <button type="button" class="quote-trigger bg-brand text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-brandBright transition flex items-center gap-2">
+        Free quote
         <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-      </a>
+      </button>
     </div>
   </div>
 </nav>
@@ -285,9 +322,10 @@ tailwind.config = {
           </h2>
           <p class="text-white/80 mt-5 max-w-md">No credit check required. Qualifying residential service. Stream, work, game, connect — same AT&amp;T network, zero friction.</p>
           <div class="mt-6 flex items-center gap-3 flex-wrap">
-            <a href="tel:6462985043" class="bg-white text-brand px-6 py-3 rounded-full font-semibold hover:bg-cyanAero hover:text-white transition flex items-center gap-2">
-              <i data-lucide="phone" class="w-4 h-4"></i> Call 646-298-5043
-            </a>
+            <button type="button" class="quote-trigger bg-white text-brand px-6 py-3 rounded-full font-semibold hover:bg-cyanAero hover:text-white transition flex items-center gap-2">
+              Get a Free Quote Today
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
             <a href="mailto:Broadwaypower25@gmail.com" class="bg-transparent border border-white/30 text-white px-6 py-3 rounded-full font-semibold hover:bg-white/10 transition">
               Email us
             </a>
@@ -333,9 +371,7 @@ tailwind.config = {
           <li class="flex items-start gap-2"><i data-lucide="laptop" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Support your smart home devices.</li>
           <li class="flex items-start gap-2"><i data-lucide="signal" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>AT&amp;T internet backup included for wireless customers.</li>
         </ul>
-        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2">
-          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </a>
+        <button type="button" class="quote-trigger mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2" style="border:none;">Get a Free Quote Today <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
       </div>
 
       <!-- PLAN 500 -->
@@ -352,9 +388,7 @@ tailwind.config = {
           <li class="flex items-start gap-2"><i data-lucide="laptop" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Connect and control multiple smart devices with ease.</li>
           <li class="flex items-start gap-2"><i data-lucide="signal" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>AT&amp;T internet backup included for wireless customers.</li>
         </ul>
-        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2">
-          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </a>
+        <button type="button" class="quote-trigger mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2" style="border:none;">Get a Free Quote Today <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
       </div>
 
       <!-- PLAN 1000 - FEATURED -->
@@ -375,9 +409,7 @@ tailwind.config = {
           <li class="flex items-start gap-2"><i data-lucide="laptop" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Unleash the full potential of your smart home ecosystem.</li>
           <li class="flex items-start gap-2"><i data-lucide="signal" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>AT&amp;T internet backup included for wireless customers.</li>
         </ul>
-        <a href="tel:6462985043" class="mt-6 w-full bg-cyanAero text-obsidian py-3 rounded-full font-semibold text-sm hover:bg-white transition flex items-center justify-center gap-2">
-          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </a>
+        <button type="button" class="quote-trigger mt-6 w-full bg-cyanAero text-obsidian py-3 rounded-full font-semibold text-sm hover:bg-white transition flex items-center justify-center gap-2" style="border:none;">Get a Free Quote Today <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
       </div>
 
       <!-- PLAN 5000 -->
@@ -398,9 +430,7 @@ tailwind.config = {
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Maximum speed for truly immersive experiences.</li>
           <li class="flex items-start gap-2"><i data-lucide="signal" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>AT&amp;T internet backup included for wireless customers.</li>
         </ul>
-        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2">
-          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </a>
+        <button type="button" class="quote-trigger mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2" style="border:none;">Get a Free Quote Today <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
       </div>
     </div>
 
@@ -437,7 +467,7 @@ tailwind.config = {
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>5G access included</li>
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Standard-definition streaming</li>
         </ul>
-        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2">Call to activate</a>
+        <button type="button" class="quote-trigger mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2" style="border:none;">Get a Free Quote Today</button>
       </div>
 
       <div class="plan-card rounded-2xl p-6 flex flex-col" style="background: linear-gradient(180deg, rgba(74,110,255,0.14), rgba(18,34,157,0.1)); border: 1px solid #4A6EFF; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
@@ -453,7 +483,7 @@ tailwind.config = {
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>25 GB hotspot included</li>
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>HD video streaming</li>
         </ul>
-        <a href="tel:6462985043" class="mt-6 w-full bg-cyanAero text-obsidian py-3 rounded-full font-semibold text-sm hover:bg-white transition text-center flex items-center justify-center gap-2">Call to activate</a>
+        <button type="button" class="quote-trigger mt-6 w-full bg-cyanAero text-obsidian py-3 rounded-full font-semibold text-sm hover:bg-white transition text-center flex items-center justify-center gap-2" style="border:none;">Get a Free Quote Today</button>
       </div>
 
       <div class="plan-card glass rounded-2xl p-6 flex flex-col">
@@ -469,7 +499,7 @@ tailwind.config = {
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>5G+ nationwide</li>
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Int'l roaming perks</li>
         </ul>
-        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2">Call to activate</a>
+        <button type="button" class="quote-trigger mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2" style="border:none;">Get a Free Quote Today</button>
       </div>
 
       <div class="plan-card glass rounded-2xl p-6 flex flex-col md:col-span-2 lg:col-span-1">
@@ -485,7 +515,7 @@ tailwind.config = {
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Unlimited talk &amp; text</li>
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Bring your own device OK</li>
         </ul>
-        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2">Call to activate</a>
+        <button type="button" class="quote-trigger mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2" style="border:none;">Get a Free Quote Today</button>
       </div>
 
       <div class="plan-card glass rounded-2xl p-6 flex flex-col">
@@ -500,7 +530,7 @@ tailwind.config = {
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Shared 5G nationwide access</li>
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Up to 10 lines eligible</li>
         </ul>
-        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2">Call to activate</a>
+        <button type="button" class="quote-trigger mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2" style="border:none;">Get a Free Quote Today</button>
       </div>
 
       <div class="plan-card glass rounded-2xl p-6 flex flex-col">
@@ -515,7 +545,7 @@ tailwind.config = {
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Device financing options</li>
           <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Dedicated account rep</li>
         </ul>
-        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2">Get a quote</a>
+        <button type="button" class="quote-trigger mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2" style="border:none;">Get a Free Quote Today</button>
       </div>
     </div>
   </div>
@@ -557,7 +587,7 @@ tailwind.config = {
       <div class="grid md:grid-cols-2 gap-10 items-center">
         <div>
           <div class="font-mono text-xs text-white/70 tracking-widest mb-3">GET STARTED</div>
-          <h2 class="font-display font-bold text-4xl md:text-5xl text-white uppercase leading-[0.95]">Call us. Get a quote.<br/>Get online.</h2>
+          <h2 class="font-display font-bold text-4xl md:text-5xl text-white uppercase leading-[0.95]">Get a quote.<br/>Get online.</h2>
           <p class="text-white/80 mt-5 max-w-md">Have a specific plan in mind, or not sure which fits? Either way — one call, no hold music, no sales script.</p>
         </div>
         <div class="glass-strong rounded-2xl p-8 space-y-5">
@@ -604,6 +634,55 @@ tailwind.config = {
 </section>
 
 </main>
+
+<!-- ==================== QUOTE MODAL ==================== -->
+<div id="quote-modal" class="quote-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="quote-modal-title">
+  <div class="quote-modal-dialog glass-strong rounded-2xl p-7">
+    <button id="quote-modal-close" class="quote-modal-close" aria-label="Close">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+    <div class="inline-flex items-center gap-2 border border-cyanAero/40 bg-cyanAero/10 rounded-full px-3 py-1 text-xs font-mono tracking-widest text-cyanAero mb-4">
+      <span class="glow-dot pulse-dot"></span>
+      GET A FREE QUOTE TODAY
+    </div>
+    <h3 id="quote-modal-title" class="font-display font-bold text-2xl mb-1">Check plans in your area</h3>
+    <p class="text-sm text-white/60 mb-5">Tell us a bit about what you need — we'll reply as fast as we can.</p>
+
+    <form id="quote-form" class="space-y-3.5">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="font-mono text-[10px] text-white/50 tracking-widest block mb-1">NAME</label>
+          <input type="text" name="name" required placeholder="Jane Doe" class="w-full bg-black/40 hairline rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-cyanAero transition text-white" />
+        </div>
+        <div>
+          <label class="font-mono text-[10px] text-white/50 tracking-widest block mb-1">EMAIL</label>
+          <input type="email" name="email" required placeholder="jane@example.com" class="w-full bg-black/40 hairline rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-cyanAero transition text-white" />
+        </div>
+        <div>
+          <label class="font-mono text-[10px] text-white/50 tracking-widest block mb-1">PHONE</label>
+          <input type="tel" name="phone" required placeholder="(555) 123-4567" class="w-full bg-black/40 hairline rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-cyanAero transition text-white" />
+        </div>
+        <div>
+          <label class="font-mono text-[10px] text-white/50 tracking-widest block mb-1">ZIP CODE</label>
+          <input type="text" name="zip" required placeholder="10451" pattern="[0-9]{5}" maxlength="5" class="w-full bg-black/40 hairline rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-cyanAero transition text-white" />
+        </div>
+      </div>
+      <div>
+        <label class="font-mono text-[10px] text-white/50 tracking-widest block mb-1">MESSAGE</label>
+        <textarea name="message" placeholder="How can we help?" rows="3" class="w-full bg-black/40 hairline rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-cyanAero transition resize-none text-white"></textarea>
+      </div>
+      <label class="flex items-start gap-2 text-[11px] text-white/50 leading-snug cursor-pointer">
+        <input type="checkbox" required class="mt-0.5 accent-cyanAero flex-shrink-0" />
+        <span>By submitting your information, you agree to our Terms of Service, Privacy Policy, and E-Sign Disclosure. Consent is not required as a condition of purchase. Message &amp; data rates may apply.</span>
+      </label>
+      <button type="submit" class="w-full bg-brand text-white py-3 rounded-full font-semibold hover:bg-brandBright transition flex items-center justify-center gap-2 mt-2">
+        Submit Quote Request
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
+      <div id="quote-form-status" class="hidden text-center text-sm py-2"></div>
+    </form>
+  </div>
+</div>
 
 <!-- FOOTER -->
 <footer class="py-14 glass hairline-t">
@@ -662,6 +741,50 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
   setTheme(cur === 'dark' ? 'light' : 'dark');
 });
 setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+
+/* ============================================================
+   QUOTE MODAL
+   ============================================================ */
+(function initQuoteModal() {
+  const backdrop = document.getElementById('quote-modal');
+  const closeBtn = document.getElementById('quote-modal-close');
+  const form = document.getElementById('quote-form');
+  const status = document.getElementById('quote-form-status');
+  if (!backdrop) return;
+
+  function open()  { backdrop.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function close() { backdrop.classList.remove('open'); document.body.style.overflow = ''; }
+
+  closeBtn && closeBtn.addEventListener('click', close);
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && backdrop.classList.contains('open')) close(); });
+
+  document.querySelectorAll('.quote-trigger').forEach(btn => {
+    btn.addEventListener('click', (e) => { e.preventDefault(); open(); });
+  });
+
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const d = new FormData(form);
+      const name = (d.get('name') || '').toString().trim();
+      const email = (d.get('email') || '').toString().trim();
+      const phone = (d.get('phone') || '').toString().trim();
+      const zip = (d.get('zip') || '').toString().trim();
+      const message = (d.get('message') || '').toString().trim();
+      const subject = `Free quote request from ${name} — ZIP ${zip}`;
+      const body =
+        `Hi Broadway,%0D%0A%0D%0AI'd like a free quote for internet / wireless.%0D%0A%0D%0A` +
+        `Name: ${name}%0D%0AEmail: ${email}%0D%0APhone: ${phone}%0D%0AZIP: ${zip}%0D%0A%0D%0A` +
+        `Message:%0D%0A${message || '(no message)'}%0D%0A%0D%0A— sent from broadway-fast-internet.vercel.app`;
+      window.location.href = `mailto:Broadwaypower25@gmail.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+      status.classList.remove('hidden');
+      status.className = 'text-center text-sm py-2 text-emerald-400';
+      status.textContent = '✓ Opening your email app… we\'ll be in touch shortly.';
+      setTimeout(() => { form.reset(); close(); status.classList.add('hidden'); }, 1200);
+    });
+  }
+})();
 </script>
 </body>
 </html>

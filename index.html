@@ -364,6 +364,43 @@ tailwind.config = {
     filter: invert(1) hue-rotate(180deg) brightness(1.05) saturate(1.1);
   }
 
+  /* ===== QUOTE MODAL ===== */
+  .quote-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(5,5,7,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .quote-modal-backdrop.open { display: flex; }
+  .quote-modal-dialog {
+    max-width: 560px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .quote-modal-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(14,16,21,0.6);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.2s ease;
+  }
+  .quote-modal-close:hover { border-color: #4A6EFF; color: #4A6EFF; }
+
   /* ===== THEME TOGGLE BUTTON ===== */
   .theme-toggle {
     width: 36px; height: 36px;
@@ -701,9 +738,9 @@ tailwind.config = {
         <h3 class="font-display font-bold text-4xl md:text-5xl uppercase">Fast Broadband<br/>$29<span class="text-cyanAero">.99</span><span class="text-lg text-white/50">/mo</span></h3>
         <p class="text-white/70 mt-4 max-w-md">Stream · Work · Game · Connect. Qualifying residential service for new customers — no credit check required. Up to $200 Visa Reward Card upon signup.</p>
         <div class="flex gap-3 mt-6 flex-wrap">
-          <a href="tel:6462985043" class="bg-cyanAero text-obsidian px-5 py-2.5 rounded-full font-semibold text-sm hover:bg-white transition flex items-center gap-2">
-            <i data-lucide="phone" class="w-4 h-4"></i> Call 646-298-5043
-          </a>
+          <button type="button" class="quote-trigger bg-cyanAero text-obsidian px-5 py-2.5 rounded-full font-semibold text-sm hover:bg-white transition flex items-center gap-2" style="border:none;">
+            Get a Free Quote Today <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
           <a href="services.html" class="hairline px-5 py-2.5 rounded-full font-semibold text-sm hover:border-cyanAero transition">
             See all plans
           </a>
@@ -1042,10 +1079,10 @@ tailwind.config = {
                   <div class="text-cyanAero">EST</div>
                 </div>
               </div>
-              <a href="tel:6462985043" id="laser-uplink-btn" class="w-full bg-cyanAero/20 border border-cyanAero text-cyanAero py-2.5 rounded-lg font-mono text-sm tracking-widest hover:bg-cyanAero hover:text-obsidian transition flex items-center justify-center gap-2">
-                <i data-lucide="phone" class="w-4 h-4"></i>
-                CALL 646-298-5043
-              </a>
+              <button type="button" id="laser-uplink-btn" class="quote-trigger w-full bg-cyanAero/20 border border-cyanAero text-cyanAero py-2.5 rounded-lg font-mono text-sm tracking-widest hover:bg-cyanAero hover:text-obsidian transition flex items-center justify-center gap-2">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                GET A FREE QUOTE TODAY
+              </button>
             </div>
           </div>
 
@@ -1264,9 +1301,9 @@ tailwind.config = {
         <div class="text-white/50 text-sm">Call us for a free availability check and plan quote — no obligation.</div>
       </div>
       <div class="flex gap-2 w-full md:w-auto">
-        <a href="tel:6462985043" class="bg-brand text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center gap-2">
-          <i data-lucide="phone" class="w-4 h-4"></i> Call 646-298-5043
-        </a>
+        <button type="button" class="quote-trigger bg-brand text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center gap-2" style="border:none;">
+          Get a Free Quote Today <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
         <a href="mailto:Broadwaypower25@gmail.com" class="hairline px-6 py-2.5 rounded-full font-semibold text-sm hover:border-cyanAero transition flex items-center gap-2">
           <i data-lucide="mail" class="w-4 h-4"></i> Email
         </a>
@@ -1285,6 +1322,55 @@ tailwind.config = {
 </footer>
 
 </main>
+
+<!-- ==================== QUOTE MODAL ==================== -->
+<div id="quote-modal" class="quote-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="quote-modal-title">
+  <div class="quote-modal-dialog glass-strong rounded-2xl p-7">
+    <button id="quote-modal-close" class="quote-modal-close" aria-label="Close">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+    <div class="inline-flex items-center gap-2 border border-cyanAero/40 bg-cyanAero/10 rounded-full px-3 py-1 text-xs font-mono tracking-widest text-cyanAero mb-4">
+      <span class="glow-dot pulse-dot"></span>
+      GET A FREE QUOTE TODAY
+    </div>
+    <h3 id="quote-modal-title" class="font-display font-bold text-2xl mb-1">Check plans in your area</h3>
+    <p class="text-sm text-white/60 mb-5">Tell us a bit about what you need — we'll reply as fast as we can.</p>
+
+    <form id="quote-form" class="space-y-3.5">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="font-mono text-[10px] text-white/50 tracking-widest block mb-1">NAME</label>
+          <input type="text" name="name" required placeholder="Jane Doe" class="w-full bg-black/40 hairline rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-cyanAero transition text-white" />
+        </div>
+        <div>
+          <label class="font-mono text-[10px] text-white/50 tracking-widest block mb-1">EMAIL</label>
+          <input type="email" name="email" required placeholder="jane@example.com" class="w-full bg-black/40 hairline rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-cyanAero transition text-white" />
+        </div>
+        <div>
+          <label class="font-mono text-[10px] text-white/50 tracking-widest block mb-1">PHONE</label>
+          <input type="tel" name="phone" required placeholder="(555) 123-4567" class="w-full bg-black/40 hairline rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-cyanAero transition text-white" />
+        </div>
+        <div>
+          <label class="font-mono text-[10px] text-white/50 tracking-widest block mb-1">ZIP CODE</label>
+          <input type="text" name="zip" required placeholder="10451" pattern="[0-9]{5}" maxlength="5" class="w-full bg-black/40 hairline rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-cyanAero transition text-white" />
+        </div>
+      </div>
+      <div>
+        <label class="font-mono text-[10px] text-white/50 tracking-widest block mb-1">MESSAGE</label>
+        <textarea name="message" placeholder="How can we help?" rows="3" class="w-full bg-black/40 hairline rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-cyanAero transition resize-none text-white"></textarea>
+      </div>
+      <label class="flex items-start gap-2 text-[11px] text-white/50 leading-snug cursor-pointer">
+        <input type="checkbox" required class="mt-0.5 accent-cyanAero flex-shrink-0" />
+        <span>By submitting your information, you agree to our Terms of Service, Privacy Policy, and E-Sign Disclosure. Consent is not required as a condition of purchase. Message &amp; data rates may apply.</span>
+      </label>
+      <button type="submit" class="w-full bg-brand text-white py-3 rounded-full font-semibold hover:bg-brandBright transition flex items-center justify-center gap-2 mt-2">
+        Submit Quote Request
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
+      <div id="quote-form-status" class="hidden text-center text-sm py-2"></div>
+    </form>
+  </div>
+</div>
 
 <!-- ==================== MISSION SUMMARY MODAL ==================== -->
 <div id="mission-modal" class="modal-backdrop">
@@ -1321,10 +1407,10 @@ tailwind.config = {
     </div>
 
     <div class="flex gap-3 flex-wrap">
-      <a href="tel:6462985043" class="flex-1 bg-brand text-white py-3 rounded-full font-semibold hover:bg-brandBright transition flex items-center justify-center gap-2 min-w-[180px]">
-        <i data-lucide="phone" class="w-4 h-4"></i>
-        Call 646-298-5043
-      </a>
+      <button type="button" class="quote-trigger flex-1 bg-brand text-white py-3 rounded-full font-semibold hover:bg-brandBright transition flex items-center justify-center gap-2 min-w-[180px]" style="border:none;">
+        Get a Free Quote Today
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
       <a href="mailto:Broadwaypower25@gmail.com" class="hairline px-6 py-3 rounded-full font-semibold hover:border-cyanAero transition flex items-center gap-2">
         <i data-lucide="mail" class="w-4 h-4"></i>
         Email us
@@ -2411,6 +2497,50 @@ setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
     status.textContent = '✓ Opening your email app… We\'ll be in touch shortly.';
     setTimeout(() => form.reset(), 400);
   });
+})();
+
+/* ============================================================
+   QUOTE MODAL — opened by every .quote-trigger button
+   ============================================================ */
+(function initQuoteModal() {
+  const backdrop = document.getElementById('quote-modal');
+  const closeBtn = document.getElementById('quote-modal-close');
+  const form = document.getElementById('quote-form');
+  const status = document.getElementById('quote-form-status');
+  if (!backdrop) return;
+
+  function open()  { backdrop.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function close() { backdrop.classList.remove('open'); document.body.style.overflow = ''; }
+
+  closeBtn && closeBtn.addEventListener('click', close);
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && backdrop.classList.contains('open')) close(); });
+
+  document.querySelectorAll('.quote-trigger').forEach(btn => {
+    btn.addEventListener('click', (e) => { e.preventDefault(); open(); });
+  });
+
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const d = new FormData(form);
+      const name = (d.get('name') || '').toString().trim();
+      const email = (d.get('email') || '').toString().trim();
+      const phone = (d.get('phone') || '').toString().trim();
+      const zip = (d.get('zip') || '').toString().trim();
+      const message = (d.get('message') || '').toString().trim();
+      const subject = `Free quote request from ${name} — ZIP ${zip}`;
+      const body =
+        `Hi Broadway,%0D%0A%0D%0AI'd like a free quote for internet / wireless.%0D%0A%0D%0A` +
+        `Name: ${name}%0D%0AEmail: ${email}%0D%0APhone: ${phone}%0D%0AZIP: ${zip}%0D%0A%0D%0A` +
+        `Message:%0D%0A${message || '(no message)'}%0D%0A%0D%0A— sent from broadway-fast-internet.vercel.app`;
+      window.location.href = `mailto:Broadwaypower25@gmail.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+      status.classList.remove('hidden');
+      status.className = 'text-center text-sm py-2 text-emerald-400';
+      status.textContent = '✓ Opening your email app… we\'ll be in touch shortly.';
+      setTimeout(() => { form.reset(); close(); status.classList.add('hidden'); }, 1200);
+    });
+  }
 })();
 </script>
 
