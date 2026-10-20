@@ -1,0 +1,2609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BROADWAY — Fast Internet. Space Missions Made Simple</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Three.js r128 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        display: ['Space Grotesk', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['Inter', 'sans-serif'],
+      },
+      colors: {
+        obsidian: '#050507',
+        panel: '#0E1015',
+        brand: '#12229d',
+        brandBright: '#4A6EFF',
+        /* legacy aliases kept pointing to brand palette */
+        cyanAero: '#4A6EFF',
+        blueAero: '#12229d',
+      }
+    }
+  }
+}
+</script>
+
+<!-- Theme init: run before paint to avoid flash -->
+<script>
+  (function(){
+    try {
+      var t = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch(e) { document.documentElement.setAttribute('data-theme','dark'); }
+  })();
+</script>
+
+<style>
+  /* ===== THEME VARIABLES ===== */
+  :root {
+    --bg: #050507;
+    --text: #E5E7EB;
+    --glass-bg: rgba(14, 16, 21, 0.65);
+    --glass-strong-bg: rgba(14, 16, 21, 0.82);
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.1);
+    --scroll-track: #050507;
+    --scroll-thumb: #1a1d24;
+    --scroll-thumb-hover: #2a2d34;
+    --terminal-bg: rgba(0,0,0,0.5);
+    --crosshair: rgba(255,255,255,0.5);
+    --pill-bg: rgba(14,16,21,0.6);
+    --hud-text: rgba(255,255,255,0.5);
+    --input-bg: rgba(0,0,0,0.4);
+  }
+  html[data-theme="light"] {
+    --bg: #f4f6fc;
+    --text: #0a0e1a;
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-strong-bg: rgba(255, 255, 255, 0.9);
+    --border: rgba(18,34,157,0.14);
+    --border-strong: rgba(18,34,157,0.2);
+    --scroll-track: #e5e8f0;
+    --scroll-thumb: #c4cad9;
+    --scroll-thumb-hover: #a0a9c0;
+    --terminal-bg: rgba(240,243,251,0.9);
+    --crosshair: rgba(18,34,157,0.35);
+    --pill-bg: rgba(255,255,255,0.75);
+    --hud-text: rgba(18,34,157,0.65);
+    --input-bg: rgba(255,255,255,0.75);
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .glass-strong {
+    background: var(--glass-strong-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-strong);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .hairline { border: 1px solid var(--border); }
+  .hairline-b { border-bottom: 1px solid var(--border); }
+  .hairline-t { border-top: 1px solid var(--border); }
+  .glow-cyan { box-shadow: 0 0 24px rgba(74, 110, 255, 0.35), inset 0 0 12px rgba(74, 110, 255, 0.15); }
+  .glow-blue { box-shadow: 0 0 24px rgba(74, 110, 255, 0.35), inset 0 0 12px rgba(74, 110, 255, 0.15); }
+  .text-glow-cyan { text-shadow: 0 0 12px rgba(74,110,255,0.6); }
+  .text-glow-blue { text-shadow: 0 0 12px rgba(74,110,255,0.6); }
+
+  /* Crosshairs */
+  .crosshair {
+    position: fixed;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    z-index: 60;
+    opacity: 0.5;
+  }
+  .crosshair::before, .crosshair::after {
+    content: '';
+    position: absolute;
+    background: var(--crosshair);
+  }
+  .crosshair::before { left: 50%; top: 0; width: 1px; height: 100%; transform: translateX(-50%); }
+  .crosshair::after { top: 50%; left: 0; height: 1px; width: 100%; transform: translateY(-50%); }
+
+  /* Canvas container */
+  #three-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100vh;
+    z-index: 0;
+    pointer-events: auto;
+  }
+
+  /* Page sits on top of the canvas */
+  main, nav, footer, header { position: relative; z-index: 2; }
+
+  /* Satellite drag hint */
+  .cursor-reticle {
+    width: 90px; height: 90px;
+    border: 1px dashed rgba(74, 110, 255, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    pointer-events: none;
+    transition: transform 0.1s ease-out;
+  }
+  .cursor-reticle::before, .cursor-reticle::after {
+    content: ''; position: absolute; background: rgba(74,110,255,0.6);
+  }
+  .cursor-reticle::before { width: 20px; height: 1px; left: -10px; top: 50%; }
+  .cursor-reticle::after { width: 20px; height: 1px; right: -10px; top: 50%; }
+
+  /* Pills */
+  .pill {
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background: var(--pill-bg);
+  }
+  .pill:hover { border-color: rgba(74,110,255,0.5); color: #4A6EFF; }
+  .pill.active { background: rgba(74,110,255,0.15); border-color: rgba(74,110,255,0.7); color: #4A6EFF; }
+  .pill-blue.active { background: rgba(74,110,255,0.15); border-color: rgba(74,110,255,0.7); color: #4A6EFF; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--scroll-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-hover); }
+
+  /* Grid texture background for solar panels (reference) */
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Odometer */
+  .odo {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Mega menu */
+  .mega-menu {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: all 0.25s ease;
+  }
+  .mega-menu.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  /* Stepper */
+  .step-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+  }
+  .step-dot.active { background: #4A6EFF; box-shadow: 0 0 12px #4A6EFF; }
+
+  /* Range slider */
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%; height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px; outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #4A6EFF;
+    cursor: pointer;
+    box-shadow: 0 0 12px #4A6EFF;
+    border: 2px solid #050507;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #4A6EFF;
+    cursor: pointer;
+    box-shadow: 0 0 12px #4A6EFF;
+    border: 2px solid #050507;
+  }
+
+  /* Progress bar */
+  .progress-track { height: 2px; background: rgba(255,255,255,0.08); }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #4A6EFF, #4A6EFF); transition: width 0.3s ease; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(5,5,7,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+
+  /* Flashing cursor */
+  @keyframes blink { 0%, 50% { opacity: 1 } 51%, 100% { opacity: 0 } }
+  .term-cursor { display: inline-block; width: 8px; height: 14px; background: #4A6EFF; animation: blink 1s infinite; margin-left: 2px; vertical-align: middle; }
+
+  /* Pulse ring */
+  @keyframes pulseRing {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+  .pulse-ring {
+    animation: pulseRing 1.6s ease-out infinite;
+  }
+
+  .section-pad { padding: 120px 0; }
+
+  @media (max-width: 768px) {
+    .section-pad { padding: 72px 0; }
+  }
+
+  /* Live telemetry ticker numbers */
+  .tick { font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
+
+  /* Bento tiles */
+  .bento-tile {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .bento-tile:hover { border-color: rgba(74,110,255,0.5); }
+
+  /* HUD corner */
+  .hud-corner {
+    position: fixed;
+    pointer-events: none;
+    z-index: 55;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--hud-text);
+    transition: color 0.3s ease;
+  }
+
+  /* 2px lines */
+  .vline { width: 1px; background: rgba(255,255,255,0.1); }
+
+  /* Terminal */
+  .terminal {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--terminal-bg);
+    border: 1px solid rgba(74,110,255,0.2);
+    border-radius: 8px;
+    padding: 20px;
+    color: #4A6EFF;
+    font-size: 12px;
+    line-height: 1.6;
+    transition: background-color 0.3s ease;
+  }
+
+  /* Tabs */
+  .tab-btn { transition: all 0.2s ease; }
+  .tab-btn.active { color: #4A6EFF; border-color: #4A6EFF; }
+
+  .glow-dot {
+    width: 6px; height: 6px;
+    background: #4A6EFF;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #4A6EFF;
+    display: inline-block;
+  }
+
+  .pulse-dot {
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Hero scrollable */
+  html { scroll-behavior: smooth; }
+
+  /* You? card gradient */
+  .you-card {
+    background: radial-gradient(ellipse at center, rgba(74,110,255,0.2) 0%, transparent 70%);
+    border: 1px dashed rgba(74,110,255,0.5);
+    animation: breathe 3s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { box-shadow: 0 0 20px rgba(74,110,255,0.3); }
+    50% { box-shadow: 0 0 40px rgba(74,110,255,0.6); }
+  }
+
+  /* ===== LIGHT THEME TAILWIND UTILITY OVERRIDES ===== */
+  html[data-theme="light"] body { color: var(--text); background: var(--bg); }
+  html[data-theme="light"] .text-white { color: #0a0e1a !important; }
+  html[data-theme="light"] .text-white\/90 { color: rgba(10,14,26,0.9) !important; }
+  html[data-theme="light"] .text-white\/80 { color: rgba(10,14,26,0.78) !important; }
+  html[data-theme="light"] .text-white\/70 { color: rgba(10,14,26,0.72) !important; }
+  html[data-theme="light"] .text-white\/60 { color: rgba(10,14,26,0.62) !important; }
+  html[data-theme="light"] .text-white\/50 { color: rgba(10,14,26,0.52) !important; }
+  html[data-theme="light"] .text-white\/40 { color: rgba(10,14,26,0.42) !important; }
+  html[data-theme="light"] .text-white\/30 { color: rgba(10,14,26,0.32) !important; }
+  html[data-theme="light"] .bg-black\/40 { background-color: rgba(255,255,255,0.7) !important; }
+  html[data-theme="light"] .bg-obsidian { background-color: var(--bg) !important; }
+  html[data-theme="light"] .bg-white\/5 { background-color: rgba(18,34,157,0.06) !important; }
+  html[data-theme="light"] .border-white\/10 { border-color: rgba(18,34,157,0.14) !important; }
+  html[data-theme="light"] .border-white\/5 { border-color: rgba(18,34,157,0.08) !important; }
+  html[data-theme="light"] .text-obsidian { color: #ffffff !important; }
+  /* Terminal interior strings tune */
+  html[data-theme="light"] .terminal { color: #12229d; }
+  html[data-theme="light"] .terminal .text-white { color: #0a0e1a !important; }
+  html[data-theme="light"] .terminal .text-white\/60,
+  html[data-theme="light"] .terminal .text-white\/70,
+  html[data-theme="light"] .terminal .text-white\/40 { color: rgba(10,14,26,0.65) !important; }
+  /* HUD telemetry — hide on light theme (space-cosmic motif doesn't fit) */
+  html[data-theme="light"] .hud-corner,
+  html[data-theme="light"] .crosshair { opacity: 0.4; }
+  /* Make the three.js canvas less dominant on light */
+  html[data-theme="light"] #three-canvas { opacity: 0.9; }
+  /* Progress bar fill - keep brand gradient */
+  html[data-theme="light"] .progress-track { background: rgba(18,34,157,0.1); }
+  /* Buttons text contrast fallback */
+  html[data-theme="light"] button.hairline:hover,
+  html[data-theme="light"] a.hairline:hover { background: rgba(18,34,157,0.04); }
+
+  /* ===== BROADWAY LOGO (theme-aware color) ===== */
+  .broadway-logo { color: #4A6EFF; transition: color 0.3s ease; }
+  html[data-theme="light"] .broadway-logo { color: #12229d; }
+
+  /* ===== BROADWAY LOGO IMAGE (adapts per theme) ===== */
+  .broadway-img {
+    transition: filter 0.3s ease;
+    display: block;
+  }
+  /* Dark theme: invert so white bg → black (blends with obsidian) and deep navy → vibrant blue */
+  html[data-theme="dark"] .broadway-img {
+    filter: invert(1) hue-rotate(180deg) brightness(1.05) saturate(1.1);
+  }
+  /* Light theme: multiply blend so white bg melts into the light page, navy stays navy */
+  html[data-theme="light"] .broadway-img {
+    mix-blend-mode: multiply;
+  }
+
+  /* ===== THEME TOGGLE BUTTON ===== */
+  .theme-toggle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: var(--pill-bg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text);
+  }
+  .theme-toggle:hover {
+    border-color: #4A6EFF;
+    color: #4A6EFF;
+  }
+</style>
+</head>
+<body class="bg-obsidian text-white">
+
+<!-- Fixed 3D canvas -->
+<div id="three-canvas"></div>
+
+<!-- HUD Corner Crosshairs -->
+<div class="crosshair" style="top:16px; left:16px;"></div>
+<div class="crosshair" style="top:16px; right:16px;"></div>
+<div class="crosshair" style="bottom:16px; left:16px;"></div>
+<div class="crosshair" style="bottom:16px; right:16px;"></div>
+
+<!-- Top-left HUD telemetry -->
+<div class="hud-corner" style="top: 44px; left: 44px;">
+  <div class="flex items-center gap-2 mb-2">
+    <span class="glow-dot pulse-dot"></span>
+    <span>SYS::ONLINE</span>
+  </div>
+  <div>LAT: <span id="hud-lat" class="tick text-cyanAero">+41.9028</span></div>
+  <div>LON: <span id="hud-lon" class="tick text-cyanAero">+12.4964</span></div>
+  <div>ALT: <span class="tick text-cyanAero">550 KM LEO</span></div>
+</div>
+
+<!-- Top-right HUD rotation -->
+<div class="hud-corner" style="top: 44px; right: 44px; text-align: right;">
+  <div class="mb-2">BUS::TELEMETRY</div>
+  <div>PITCH: <span id="hud-pitch" class="tick text-cyanAero">+00.00°</span></div>
+  <div>YAW: <span id="hud-yaw" class="tick text-cyanAero">+00.00°</span></div>
+  <div>ROLL: <span id="hud-roll" class="tick text-cyanAero">+00.00°</span></div>
+</div>
+
+<!-- Bottom-left HUD -->
+<div class="hud-corner" style="bottom: 44px; left: 44px;">
+  <div>ORBIT::SSO 97.6°</div>
+  <div>V: <span class="tick text-cyanAero">7.62 KM/S</span></div>
+</div>
+
+<!-- Bottom-right HUD -->
+<div class="hud-corner" style="bottom: 44px; right: 44px; text-align: right;">
+  <div>FRAME: <span id="hud-fps" class="tick text-cyanAero">60</span> FPS</div>
+  <div>T+ <span id="hud-time" class="tick text-cyanAero">000:00:00</span></div>
+</div>
+
+<!-- ==================== NAV ==================== -->
+<nav class="fixed top-0 left-0 w-full z-50 glass-strong hairline-b">
+  <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <div class="flex items-center gap-10">
+      <a href="index.html" class="flex items-center">
+        <img src="Broadway1.png" alt="Broadway Fast Internet" class="broadway-img h-14 w-auto" />
+      </a>
+      <div class="hidden md:flex items-center gap-7 text-sm">
+        <a href="index.html" class="text-cyanAero">Home</a>
+        <a href="services.html" class="hover:text-cyanAero transition">Services &amp; Prices</a>
+        <button id="sat-menu-trigger" class="flex items-center gap-1 hover:text-cyanAero transition">
+          Plans
+          <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+        </button>
+        <a href="#heritage" class="hover:text-cyanAero transition">About</a>
+        <a href="#footer-contact" class="hover:text-cyanAero transition">Contact</a>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="hidden md:flex items-center gap-2 font-mono text-xs text-white/50">
+        <span class="glow-dot pulse-dot"></span>
+        LIVE
+      </div>
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle light / dark theme">
+        <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+      </button>
+      <a href="services.html" class="group bg-brand text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-brandBright transition flex items-center gap-2">
+        Shop plans
+        <i data-lucide="arrow-up-right" class="w-4 h-4 group-hover:rotate-45 transition"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Mega Menu -->
+  <div id="mega-menu" class="mega-menu absolute left-0 w-full glass-strong hairline-b hairline-t">
+    <div class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- AT&T Internet Plans -->
+      <div>
+        <div class="font-mono text-xs text-white/40 mb-5 tracking-widest">AT&amp;T FIBER INTERNET</div>
+        <div class="space-y-3">
+          <a href="services.html#plan-300" data-platform="frameS" class="platform-card glass p-4 rounded-lg hairline cursor-pointer hover:border-cyanAero transition block">
+            <div class="flex items-center justify-between">
+              <div class="font-display font-bold text-lg">INTERNET 300</div>
+              <div class="font-mono text-xs text-cyanAero">$50/mo</div>
+            </div>
+            <div class="font-mono text-xs text-white/60 mt-1">300 MBPS · STREAM &amp; GAME</div>
+          </a>
+          <a href="services.html#plan-500" data-platform="frameL" class="platform-card glass p-4 rounded-lg hairline cursor-pointer hover:border-cyanAero transition block">
+            <div class="flex items-center justify-between">
+              <div class="font-display font-bold text-lg">INTERNET 500</div>
+              <div class="font-mono text-xs text-cyanAero">$60/mo</div>
+            </div>
+            <div class="font-mono text-xs text-white/60 mt-1">500 MBPS · LOW-LAG GAMING</div>
+          </a>
+          <a href="services.html#plan-1000" data-platform="frameMax" class="platform-card glass p-4 rounded-lg hairline cursor-pointer hover:border-cyanAero transition block">
+            <div class="flex items-center justify-between">
+              <div class="font-display font-bold text-lg">INTERNET 1 GIG</div>
+              <div class="font-mono text-xs text-cyanAero">$70/mo</div>
+            </div>
+            <div class="font-mono text-xs text-white/60 mt-1">1 GBPS · WORK &amp; PRO GAMING</div>
+          </a>
+          <a href="services.html#plan-5000" data-platform="frameMax" class="platform-card glass p-4 rounded-lg hairline cursor-pointer hover:border-cyanAero transition block">
+            <div class="flex items-center justify-between">
+              <div class="font-display font-bold text-lg">INTERNET 5 GIG</div>
+              <div class="font-mono text-xs text-cyanAero">$110/mo</div>
+            </div>
+            <div class="font-mono text-xs text-white/60 mt-1">5 GBPS · MAX PERFORMANCE</div>
+          </a>
+        </div>
+      </div>
+      <!-- Wireless -->
+      <div>
+        <div class="font-mono text-xs text-white/40 mb-5 tracking-widest">AT&amp;T WIRELESS</div>
+        <ul class="space-y-3">
+          <li class="flex items-center justify-between hover:text-cyanAero cursor-pointer transition">
+            <span>Unlimited Starter</span>
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+          </li>
+          <li class="flex items-center justify-between hover:text-cyanAero cursor-pointer transition">
+            <span>Unlimited Extra</span>
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+          </li>
+          <li class="flex items-center justify-between hover:text-cyanAero cursor-pointer transition">
+            <span>Unlimited Premium</span>
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+          </li>
+          <li class="flex items-center justify-between hover:text-cyanAero cursor-pointer transition">
+            <span>Family / Multi-Line</span>
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+          </li>
+          <li class="flex items-center justify-between hover:text-cyanAero cursor-pointer transition">
+            <span>Prepaid / No Credit Check</span>
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+          </li>
+        </ul>
+      </div>
+      <!-- Services -->
+      <div>
+        <div class="font-mono text-xs text-white/40 mb-5 tracking-widest">OUR SERVICES</div>
+        <ul class="grid grid-cols-1 gap-y-2 text-sm">
+          <li class="hover:text-cyanAero cursor-pointer">Availability Check</li>
+          <li class="hover:text-cyanAero cursor-pointer">Plan Comparison</li>
+          <li class="hover:text-cyanAero cursor-pointer">Service Activation</li>
+          <li class="hover:text-cyanAero cursor-pointer">Bundle Optimization</li>
+          <li class="hover:text-cyanAero cursor-pointer">Equipment Setup</li>
+          <li class="hover:text-cyanAero cursor-pointer">Billing Support</li>
+          <li class="hover:text-cyanAero cursor-pointer">Line Transfers</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Sticky Section Progress Bar -->
+<div class="fixed top-20 left-0 w-full z-40 glass hairline-b">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between font-mono text-[10px] tracking-widest">
+    <div id="prog-1" class="flex items-center gap-2 text-cyanAero">
+      <span class="step-dot active"></span>
+      HOW IT WORKS
+    </div>
+    <div class="flex-1 mx-4 progress-track rounded-full"><div id="progress-fill" class="progress-fill rounded-full" style="width:0%"></div></div>
+    <div id="prog-2" class="flex items-center gap-2 text-white/40">
+      <span class="step-dot"></span>
+      WHY BROADWAY
+    </div>
+    <div class="w-16 mx-2 progress-track rounded-full hidden md:block"></div>
+    <div id="prog-3" class="flex items-center gap-2 text-white/40 ml-4">
+      <span class="step-dot"></span>
+      NETWORK
+    </div>
+    <div class="w-16 mx-2 progress-track rounded-full hidden md:block"></div>
+    <div id="prog-4" class="flex items-center gap-2 text-white/40 ml-4">
+      <span class="step-dot"></span>
+      PLANS
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ==================== HERO ==================== -->
+<section id="hero" class="min-h-screen flex items-center section-pad pt-40">
+  <div class="max-w-7xl mx-auto px-6 w-full grid md:grid-cols-2 gap-10 items-center">
+    <div>
+      <div class="flex items-center gap-3 mb-8 flex-wrap">
+        <span class="pill active">
+          <i data-lucide="badge-check" class="w-3 h-3 inline mr-1"></i>
+          AT&amp;T Authorized Dealer
+        </span>
+        <span class="pill active">
+          <i data-lucide="zap" class="w-3 h-3 inline mr-1"></i>
+          Same-Day Activation
+        </span>
+      </div>
+
+      <h1 class="font-display font-bold text-6xl md:text-7xl leading-[0.95] uppercase mb-6">
+        Fast<br/>
+        Internet<br/>
+        <span class="text-cyanAero">Made Simple</span>
+      </h1>
+
+      <p class="text-white/60 max-w-md mb-10 text-lg">
+        AT&amp;T Fiber, Home Internet, and Wireless plans — direct from an authorized dealer in New York. Transparent pricing, no hidden fees, activation in hours.
+      </p>
+
+      <div class="flex items-center gap-4 flex-wrap">
+        <a href="services.html" class="bg-brand text-white px-6 py-3 rounded-full font-semibold flex items-center gap-2 hover:bg-brandBright transition">
+          Shop plans
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+        <a href="tel:6462985043" class="hairline px-6 py-3 rounded-full font-semibold hover:border-cyanAero transition flex items-center gap-2">
+          <i data-lucide="phone" class="w-4 h-4"></i>
+          Call 646-298-5043
+        </a>
+      </div>
+
+      <!-- Challenge vs Solution -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-16">
+        <div class="glass p-6 rounded-xl">
+          <div class="font-mono text-xs text-red-400 mb-3 tracking-widest">⚠ THE PROBLEM</div>
+          <p class="text-sm text-white/70 leading-relaxed">
+            Internet shopping is confusing — too many plans, hidden fees, and call centers that transfer you around for hours.
+          </p>
+        </div>
+        <div class="glass p-6 rounded-xl" style="border-color: rgba(74,110,255,0.3)">
+          <div class="font-mono text-xs text-cyanAero mb-3 tracking-widest">✓ THE SOLUTION</div>
+          <p class="text-sm text-white/80 leading-relaxed">
+            One direct line to a licensed AT&amp;T sales expert in NYC. Fixed pricing, same-day activation, local support that picks up the phone.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: 3D viewport space + cursor reticle -->
+    <div class="relative h-[520px] hidden md:block" id="hero-3d-space">
+      <div id="drag-reticle" class="cursor-reticle" style="left: 50%; top: 50%; transform: translate(-50%, -50%)">
+        <div class="font-mono text-[9px] text-cyanAero text-center">
+          DRAG TO<br/>ROTATE
+        </div>
+      </div>
+      <!-- Scanning line decoration -->
+      <div class="absolute top-0 right-0 font-mono text-[10px] text-white/40 tracking-widest">
+        GLOBAL::NETWORK LIVE
+      </div>
+      <div class="absolute bottom-0 left-0 font-mono text-[10px] text-white/40 tracking-widest">
+        <span class="glow-dot pulse-dot mr-1"></span>LIVE TELEMETRY
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TIMELINE SECTION ==================== -->
+<section id="timeline-section" class="section-pad">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <div class="font-mono text-xs text-cyanAero tracking-widest mb-3">TWO STEPS TO GET ONLINE</div>
+      <h2 class="font-display font-bold text-4xl md:text-5xl uppercase">From Shopping<br/>To Connected</h2>
+    </div>
+
+    <div class="relative glass rounded-2xl p-10">
+      <div class="grid md:grid-cols-2 gap-10 items-center">
+        <!-- Step 01 -->
+        <div class="relative">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-14 h-14 rounded-full border border-cyanAero flex items-center justify-center font-display font-bold text-cyanAero text-xl glow-cyan">01</div>
+            <div>
+              <div class="font-mono text-xs text-white/40 tracking-widest">STEP</div>
+              <div class="font-display text-xl uppercase">Pick your plan</div>
+            </div>
+          </div>
+          <p class="text-white/60 text-sm">Call us or shop online. We check AT&amp;T Fiber availability at your address and match you with the right speed + wireless bundle.</p>
+        </div>
+
+        <!-- Step 02 -->
+        <div class="relative">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-14 h-14 rounded-full border border-blueAero flex items-center justify-center font-display font-bold text-blueAero text-xl glow-blue">02</div>
+            <div>
+              <div class="font-mono text-xs text-white/40 tracking-widest">STEP</div>
+              <div class="font-display text-xl uppercase">Activate &amp; get online</div>
+            </div>
+          </div>
+          <p class="text-white/60 text-sm">We handle the full activation through our authorized AT&amp;T dealer channel — in most NY areas you're online the same day.</p>
+        </div>
+      </div>
+
+      <!-- Horizontal timeline -->
+      <div class="mt-12">
+        <div class="flex items-center justify-between font-mono text-xs text-white/50 mb-3">
+          <span>CALL</span>
+          <span class="text-cyanAero">SAME-DAY ACTIVATION IN MOST NY AREAS</span>
+          <span>ONLINE</span>
+        </div>
+        <div class="relative h-2 bg-white/5 rounded-full overflow-hidden">
+          <div class="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-cyanAero via-blueAero to-purple-500 rounded-full"></div>
+          <div class="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+        </div>
+
+        <!-- Pipeline badges -->
+        <div class="flex items-center justify-between mt-8">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg hairline flex items-center justify-center">
+              <i data-lucide="map-pin" class="w-4 h-4 text-cyanAero"></i>
+            </div>
+            <div>
+              <div class="font-mono text-xs text-white/40">01</div>
+              <div class="font-display font-semibold text-sm">CHECK</div>
+            </div>
+          </div>
+          <i data-lucide="arrow-right" class="w-4 h-4 text-white/30"></i>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg hairline flex items-center justify-center">
+              <i data-lucide="list-checks" class="w-4 h-4 text-cyanAero"></i>
+            </div>
+            <div>
+              <div class="font-mono text-xs text-white/40">02</div>
+              <div class="font-display font-semibold text-sm">CHOOSE</div>
+            </div>
+          </div>
+          <i data-lucide="arrow-right" class="w-4 h-4 text-white/30"></i>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg hairline flex items-center justify-center">
+              <i data-lucide="plug-zap" class="w-4 h-4 text-cyanAero"></i>
+            </div>
+            <div>
+              <div class="font-mono text-xs text-white/40">03</div>
+              <div class="font-display font-semibold text-sm">INSTALL</div>
+            </div>
+          </div>
+          <i data-lucide="arrow-right" class="w-4 h-4 text-white/30"></i>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg hairline flex items-center justify-center">
+              <i data-lucide="wifi" class="w-4 h-4 text-cyanAero"></i>
+            </div>
+            <div>
+              <div class="font-mono text-xs text-white/40">04</div>
+              <div class="font-display font-semibold text-sm">ONLINE</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== STEP 01: APPLICATION CONFIGURATOR ==================== -->
+<section id="step1" class="section-pad">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-14">
+      <div class="font-mono text-xs text-cyanAero tracking-widest mb-3">
+        <span class="font-bold">01</span> / HOW IT WORKS
+      </div>
+      <h2 class="font-display font-bold text-4xl md:text-5xl uppercase">Pick<br/>your plan</h2>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6">
+      <!-- Switcher + pills -->
+      <div class="lg:col-span-3 glass rounded-2xl p-8">
+        <!-- Category switcher -->
+        <div class="flex gap-2 mb-8 glass-strong rounded-full p-1 w-fit">
+          <button id="cat-remote" class="cat-btn px-5 py-2 rounded-full text-sm font-mono tracking-widest">
+            INTERNET
+          </button>
+          <button id="cat-conn" class="cat-btn px-5 py-2 rounded-full text-sm font-mono tracking-widest">
+            WIRELESS
+          </button>
+        </div>
+
+        <!-- Internet pills -->
+        <div id="remote-pills" class="pill-grid">
+          <div class="font-mono text-xs text-white/40 mb-4 tracking-widest">AT&amp;T FIBER SPEED</div>
+          <div class="flex flex-wrap gap-2">
+            <button class="pill" data-payload="hyperspectral" data-type="remote">300 Mbps</button>
+            <button class="pill" data-payload="multispectral" data-type="remote">500 Mbps</button>
+            <button class="pill" data-payload="sar" data-type="remote">1 GIG</button>
+            <button class="pill" data-payload="thermal" data-type="remote">2 GIG</button>
+            <button class="pill" data-payload="vhr" data-type="remote">5 GIG</button>
+          </div>
+        </div>
+
+        <!-- Wireless pills -->
+        <div id="conn-pills" class="pill-grid hidden">
+          <div class="font-mono text-xs text-white/40 mb-4 tracking-widest">AT&amp;T WIRELESS PLAN</div>
+          <div class="flex flex-wrap gap-2">
+            <button class="pill pill-blue" data-payload="ads-b" data-type="conn">Unlimited Starter</button>
+            <button class="pill pill-blue" data-payload="ais" data-type="conn">Unlimited Extra</button>
+            <button class="pill pill-blue" data-payload="broadband" data-type="conn">Unlimited Premium</button>
+            <button class="pill pill-blue" data-payload="sigint" data-type="conn">Family 4-Line</button>
+            <button class="pill pill-blue" data-payload="storeforward" data-type="conn">Prepaid</button>
+          </div>
+        </div>
+
+        <!-- Live plan card -->
+        <div class="mt-8 border border-cyanAero/30 rounded-xl p-6" style="background: rgba(74,110,255,0.03)">
+          <div class="flex items-center justify-between mb-4">
+            <div class="font-mono text-xs text-cyanAero tracking-widest">
+              <span class="glow-dot pulse-dot mr-1"></span>LIVE PLAN DETAILS
+            </div>
+            <div class="font-mono text-xs text-white/40" id="payload-selected-name">—</div>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div>
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">SPEED</div>
+              <div class="font-display font-bold text-xl mt-1 text-cyanAero" id="tel-swath">—</div>
+            </div>
+            <div>
+              <div class="font-mono text-[10px] text-white/40 tracking-widest" id="tel-res-label">PRICE / MO</div>
+              <div class="font-display font-bold text-xl mt-1 text-cyanAero" id="tel-res">—</div>
+            </div>
+            <div>
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">SETUP</div>
+              <div class="font-display font-bold text-xl mt-1 text-cyanAero" id="tel-power">—</div>
+            </div>
+            <div>
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">CONTRACT</div>
+              <div class="font-display font-bold text-xl mt-1 text-cyanAero" id="tel-orbit">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Service Cards column -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="glass p-6 rounded-xl flex items-start gap-4">
+          <div class="w-12 h-12 rounded-lg hairline flex items-center justify-center flex-shrink-0">
+            <i data-lucide="map-pin" class="w-5 h-5 text-cyanAero"></i>
+          </div>
+          <div>
+            <div class="font-display font-bold text-lg uppercase">Availability &amp; Plan Design</div>
+            <p class="text-white/60 text-sm mt-2">We check AT&amp;T Fiber coverage at your address and compare plans to match your household's needs.</p>
+          </div>
+        </div>
+        <div class="glass p-6 rounded-xl flex items-start gap-4">
+          <div class="w-12 h-12 rounded-lg hairline flex items-center justify-center flex-shrink-0">
+            <i data-lucide="router" class="w-5 h-5 text-cyanAero"></i>
+          </div>
+          <div>
+            <div class="font-display font-bold text-lg uppercase">Equipment &amp; Installation</div>
+            <p class="text-white/60 text-sm mt-2">AT&amp;T Wi-Fi 6 gateway included. Self-install kit or professional tech scheduling — your call.</p>
+          </div>
+        </div>
+        <div class="glass p-6 rounded-xl flex items-start gap-4">
+          <div class="w-12 h-12 rounded-lg hairline flex items-center justify-center flex-shrink-0">
+            <i data-lucide="life-buoy" class="w-5 h-5 text-cyanAero"></i>
+          </div>
+          <div>
+            <div class="font-display font-bold text-lg uppercase">Billing &amp; Local Support</div>
+            <p class="text-white/60 text-sm mt-2">A real NY-based dealer handles your account setup, autopay enrollment, and any billing questions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== STEP 02: SPACE OPS ==================== -->
+<section id="step2" class="section-pad">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-14">
+      <div class="font-mono text-xs text-cyanAero tracking-widest mb-3">
+        <span class="font-bold">02</span> / WHY BROADWAY
+      </div>
+      <h2 class="font-display font-bold text-4xl md:text-5xl uppercase">A Local Dealer<br/>With a Direct Line</h2>
+    </div>
+
+    <div class="glass rounded-2xl p-8">
+      <!-- Tab triggers -->
+      <div class="flex items-center gap-6 border-b border-white/10 mb-6 flex-wrap">
+        <button class="tab-btn active py-3 border-b-2 border-transparent font-mono text-sm tracking-widest flex items-center gap-2" data-tab="command">
+          <i data-lucide="phone-call" class="w-4 h-4"></i> DIRECT LINE
+        </button>
+        <button class="tab-btn py-3 border-b-2 border-transparent font-mono text-sm tracking-widest text-white/50 flex items-center gap-2" data-tab="monitor">
+          <i data-lucide="activity" class="w-4 h-4"></i> LIVE AVAILABILITY
+        </button>
+        <button class="tab-btn py-3 border-b-2 border-transparent font-mono text-sm tracking-widest text-white/50 flex items-center gap-2" data-tab="access">
+          <i data-lucide="receipt" class="w-4 h-4"></i> TRANSPARENT PRICING
+        </button>
+      </div>
+
+      <!-- DIRECT LINE TAB -->
+      <div id="tab-command" class="tab-panel">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <div class="font-display font-bold text-xl mb-2 uppercase">Skip the call-center maze — one direct line to a licensed AT&amp;T expert</div>
+            <p class="text-white/60 text-sm mb-6">We're an authorized AT&amp;T dealer in Bronx, NY. One phone number, one email, one person handles your order from availability check to activation.</p>
+
+            <div class="glass p-4 rounded-lg mb-4">
+              <div class="font-mono text-xs text-white/40 mb-3 tracking-widest">YOUR DEDICATED REP</div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="font-mono text-sm">Broadway · Order Desk</div>
+                <div class="font-mono text-xs text-cyanAero">AVG RESPONSE: 2 MIN</div>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center font-mono text-xs mb-4">
+                <div class="hairline rounded p-2">
+                  <div class="text-white/40 text-[10px]">OPEN</div>
+                  <div class="text-cyanAero">MON–SUN</div>
+                </div>
+                <div class="hairline rounded p-2">
+                  <div class="text-white/40 text-[10px]">HOURS</div>
+                  <div class="text-cyanAero">9A — 9P</div>
+                </div>
+                <div class="hairline rounded p-2">
+                  <div class="text-white/40 text-[10px]">TZ</div>
+                  <div class="text-cyanAero">EST</div>
+                </div>
+              </div>
+              <a href="tel:6462985043" id="laser-uplink-btn" class="w-full bg-cyanAero/20 border border-cyanAero text-cyanAero py-2.5 rounded-lg font-mono text-sm tracking-widest hover:bg-cyanAero hover:text-obsidian transition flex items-center justify-center gap-2">
+                <i data-lucide="phone" class="w-4 h-4"></i>
+                CALL 646-298-5043
+              </a>
+            </div>
+          </div>
+
+          <div class="terminal">
+            <div class="opacity-60 mb-2">[broadway@desk ~]$ order --check</div>
+            <div>→ Lookup session <span class="text-white">BW-2178</span></div>
+            <div>→ Authorized dealer channel (AT&amp;T)</div>
+            <div class="text-white/60">├ Checking address availability...</div>
+            <div class="text-white/60">├ Plan selected: <span id="term-payload" class="text-cyanAero">—</span></div>
+            <div class="text-white/60">├ Equipment: Wi-Fi 6 Gateway (included)</div>
+            <div class="text-white/60">├ Install window: SAME DAY</div>
+            <div class="text-white">└ <span class="text-emerald-400">READY TO ACTIVATE</span><span class="term-cursor"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE AVAILABILITY TAB -->
+      <div id="tab-monitor" class="tab-panel hidden">
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="glass p-5 rounded-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div class="font-mono text-xs text-white/40 tracking-widest">FIBER COVERAGE / NY</div>
+              <div class="glow-dot pulse-dot"></div>
+            </div>
+            <div class="font-display font-bold text-3xl text-cyanAero mb-3" id="mon-solar">87.3%</div>
+            <canvas id="chart-solar" width="320" height="80"></canvas>
+          </div>
+          <div class="glass p-5 rounded-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div class="font-mono text-xs text-white/40 tracking-widest">AVG INSTALL TIME</div>
+              <div class="glow-dot pulse-dot"></div>
+            </div>
+            <div class="font-display font-bold text-3xl text-cyanAero mb-3" id="mon-batt">24 HR</div>
+            <canvas id="chart-batt" width="320" height="80"></canvas>
+          </div>
+          <div class="glass p-5 rounded-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div class="font-mono text-xs text-white/40 tracking-widest">NETWORK UPTIME</div>
+              <div class="glow-dot pulse-dot"></div>
+            </div>
+            <div class="font-display font-bold text-3xl text-cyanAero mb-3" id="mon-att">99.98%</div>
+            <canvas id="chart-att" width="320" height="80"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRANSPARENT PRICING TAB -->
+      <div id="tab-access" class="tab-panel hidden">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <div class="font-display font-bold text-xl mb-2 uppercase">What you see is what you pay</div>
+            <p class="text-white/60 text-sm mb-4">Every quote is itemized up front. Equipment, taxes, installation fees, and promotional discounts — all shown before you commit.</p>
+
+            <div class="terminal mb-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-white/40">Example — AT&amp;T Internet 1 GIG</span>
+                <button id="copy-btn-1" class="text-cyanAero hover:text-white text-xs">COPY</button>
+              </div>
+              <div class="text-white/70">Monthly service ............... $70.00</div>
+              <div class="text-white/70">Autopay &amp; paperless (−$10) .... $60.00</div>
+              <div class="text-white/70">Wi-Fi 6 Gateway (included) .... $0.00</div>
+              <div class="text-white/70">Installation (self-install) ... $0.00</div>
+              <div class="text-emerald-400">TOTAL — $60.00/mo + taxes</div>
+            </div>
+          </div>
+          <div>
+            <div class="terminal">
+              <div class="text-white/40 mb-2">// your-quote.json</div>
+              <div>{</div>
+              <div>&nbsp;&nbsp;"carrier": <span class="text-emerald-400">"AT&amp;T Fiber"</span>,</div>
+              <div>&nbsp;&nbsp;"plan": <span class="text-emerald-400">"Internet 1 GIG"</span>,</div>
+              <div>&nbsp;&nbsp;"base_price_usd": <span class="text-amber-400">70.00</span>,</div>
+              <div>&nbsp;&nbsp;"after_autopay_usd": <span class="text-amber-400">60.00</span>,</div>
+              <div>&nbsp;&nbsp;"setup_fee_usd": <span class="text-amber-400">0.00</span>,</div>
+              <div>&nbsp;&nbsp;"contract_months": <span class="text-amber-400">0</span>,</div>
+              <div>&nbsp;&nbsp;"activation": <span class="text-emerald-400">"same_day"</span>,</div>
+              <div>&nbsp;&nbsp;"dealer": <span class="text-emerald-400">"Broadway Power LLC"</span></div>
+              <div>}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TECHNOLOGY ==================== -->
+<section id="tech" class="section-pad">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-14 flex items-end justify-between flex-wrap gap-4">
+      <div>
+        <div class="font-mono text-xs text-cyanAero tracking-widest mb-3">NETWORK &amp; TECHNOLOGY</div>
+        <h2 class="font-display font-bold text-4xl md:text-5xl uppercase">AT&amp;T Fiber<br/>+ Nationwide 5G</h2>
+      </div>
+      <button id="xray-toggle" class="hairline px-5 py-3 rounded-full font-mono text-sm tracking-widest flex items-center gap-2 hover:border-cyanAero transition">
+        <i data-lucide="scan" class="w-4 h-4"></i>
+        X-RAY NETWORK MODE
+        <span class="glow-dot ml-2"></span>
+      </button>
+    </div>
+
+    <!-- Bento Grid -->
+    <div class="grid md:grid-cols-3 gap-4 mb-10">
+      <div class="bento-tile glass p-7 rounded-2xl">
+        <i data-lucide="shield-check" class="w-7 h-7 text-cyanAero mb-5"></i>
+        <div class="font-display font-bold text-xl uppercase mb-2">Internet Backup Included</div>
+        <p class="text-white/60 text-sm">Pair with AT&amp;T wireless and stay connected even if your fiber goes down — no extra cost.</p>
+      </div>
+      <div class="bento-tile glass p-7 rounded-2xl">
+        <i data-lucide="gauge" class="w-7 h-7 text-cyanAero mb-5"></i>
+        <div class="font-display font-bold text-xl uppercase mb-2">Up to</div>
+        <div class="font-display font-bold text-3xl text-cyanAero">5 GIG<span class="text-sm text-white/60"> SYMMETRIC</span></div>
+        <p class="text-white/60 text-sm mt-2">AT&amp;T Fiber delivers equal upload + download speeds — perfect for work, streaming, gaming.</p>
+      </div>
+      <div class="bento-tile glass p-7 rounded-2xl">
+        <i data-lucide="package" class="w-7 h-7 text-cyanAero mb-5"></i>
+        <div class="font-display font-bold text-xl uppercase mb-2">Equipment Included</div>
+        <p class="text-white/60 text-sm">AT&amp;T Wi-Fi 6 Gateway comes free with every fiber plan. No modem rental fees. No surprises.</p>
+      </div>
+    </div>
+
+    <!-- Build your bundle control panel -->
+    <div class="glass rounded-2xl p-8">
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+        <div>
+          <div class="font-display font-bold text-2xl uppercase">Build Your <span class="text-cyanAero">PERFECT</span> Bundle</div>
+          <div class="text-white/60 text-sm mt-1">Live price estimator — Internet + Wireless + add-ons</div>
+        </div>
+        <div class="font-mono text-xs text-cyanAero flex items-center gap-2">
+          <span class="glow-dot pulse-dot"></span>
+          LIVE RATE CARD
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-10">
+        <!-- Sliders -->
+        <div class="space-y-6">
+          <div>
+            <div class="flex items-center justify-between mb-2 font-mono text-xs">
+              <span class="text-white/60 tracking-widest">INTERNET SPEED</span>
+              <span class="text-cyanAero" id="charge-val">4.0 A</span>
+            </div>
+            <input id="charge-slider" type="range" min="1" max="10" value="4" step="0.1" />
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-2 font-mono text-xs">
+              <span class="text-white/60 tracking-widest">WIRELESS LINES</span>
+              <span class="text-cyanAero" id="dod-val">30%</span>
+            </div>
+            <input id="dod-slider" type="range" min="10" max="60" value="30" />
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-2 font-mono text-xs">
+              <span class="text-white/60 tracking-widest">DATA PER LINE</span>
+              <span class="text-cyanAero" id="data-val">100 Mbps</span>
+            </div>
+            <input id="data-slider" type="range" min="10" max="500" value="100" />
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-2 font-mono text-xs">
+              <span class="text-white/60 tracking-widest">PROTECTION / ADD-ONS</span>
+              <span class="text-cyanAero" id="tx-val">30 dBm</span>
+            </div>
+            <input id="tx-slider" type="range" min="10" max="50" value="30" />
+          </div>
+        </div>
+
+        <!-- Readout + wireframe toggle -->
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="hairline rounded-lg p-4">
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">PANEL EFFICIENCY</div>
+              <div class="font-display font-bold text-2xl text-cyanAero" id="eff-val">31.2%</div>
+            </div>
+            <div class="hairline rounded-lg p-4">
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">BUNDLE DISCOUNT</div>
+              <div class="font-display font-bold text-2xl text-cyanAero" id="link-val">+9.4 dB</div>
+            </div>
+            <div class="hairline rounded-lg p-4">
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">INSTALL TIME</div>
+              <div class="font-display font-bold text-2xl text-cyanAero" id="thermal-val">+28°C</div>
+            </div>
+            <div class="hairline rounded-lg p-4">
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">EST. SETUP FEE</div>
+              <div class="font-display font-bold text-2xl text-cyanAero" id="dl-val">38.4 GB</div>
+            </div>
+          </div>
+          <button id="xray-toggle-2" class="w-full hairline rounded-xl py-4 font-mono text-sm tracking-widest hover:border-cyanAero transition flex items-center justify-center gap-2">
+            <i data-lucide="scan-eye" class="w-4 h-4"></i>
+            INSPECT NETWORK LAYERS (3D X-RAY)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PLANS / PRICING ==================== -->
+<section id="costing" class="section-pad">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-14 text-center">
+      <div class="font-mono text-xs text-cyanAero tracking-widest mb-3">AT&amp;T FIBER PLANS · FIXED PRICING</div>
+      <h2 class="font-display font-bold text-4xl md:text-5xl uppercase">Pick Your Speed</h2>
+      <p class="text-white/60 mt-4 max-w-2xl mx-auto">Price after $10/mo discount w/ eligible Autopay &amp; Paperless billing (w/in 2 bills). Limited availability in select areas.</p>
+    </div>
+
+    <!-- 4 Plan Cards -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <!-- Plan 300 -->
+      <div class="glass rounded-2xl p-6 hairline flex flex-col hover:border-cyanAero transition">
+        <div class="font-mono text-xs text-white/50 tracking-widest">AT&amp;T INTERNET 300</div>
+        <div class="font-display font-bold text-2xl mt-2 uppercase">300 Mbps</div>
+        <div class="mt-5">
+          <div class="font-mono text-xs text-white/40 line-through">$60.00/mo</div>
+          <div class="font-display font-bold text-4xl text-white mt-1">$50<span class="text-lg text-white/50">.00/mo</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">+ taxes &amp; fees</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Stream, game, video chat</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Supports smart home</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Wi-Fi 6 Gateway included</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Internet backup w/ wireless</li>
+        </ul>
+        <a href="services.html#plan-300" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2">
+          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- Plan 500 -->
+      <div class="glass rounded-2xl p-6 hairline flex flex-col hover:border-cyanAero transition">
+        <div class="font-mono text-xs text-white/50 tracking-widest">AT&amp;T INTERNET 500</div>
+        <div class="font-display font-bold text-2xl mt-2 uppercase">500 Mbps</div>
+        <div class="mt-5">
+          <div class="font-mono text-xs text-white/40 line-through">$75.00/mo</div>
+          <div class="font-display font-bold text-4xl text-white mt-1">$60<span class="text-lg text-white/50">.00/mo</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">+ taxes &amp; fees</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Low-lag gaming</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Multiple smart devices</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Wi-Fi 6 Gateway included</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Internet backup w/ wireless</li>
+        </ul>
+        <a href="services.html#plan-500" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2">
+          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- Plan 1000 - FEATURED -->
+      <div class="relative rounded-2xl p-6 flex flex-col" style="background: linear-gradient(180deg, rgba(74,110,255,0.08), rgba(18,34,157,0.04)); border: 1px solid #4A6EFF; box-shadow: 0 0 40px rgba(74,110,255,0.25);">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand text-white font-mono text-[10px] tracking-widest px-3 py-1 rounded-full">MOST POPULAR</div>
+        <div class="font-mono text-xs text-cyanAero tracking-widest">AT&amp;T INTERNET 1000</div>
+        <div class="font-display font-bold text-2xl mt-2 uppercase">1 GIG speed</div>
+        <div class="mt-5">
+          <div class="font-mono text-xs text-white/40 line-through">$90.00/mo</div>
+          <div class="font-display font-bold text-4xl text-white mt-1">$70<span class="text-lg text-white/50">.00/mo</span></div>
+          <div class="font-mono text-[10px] text-cyanAero mt-1">+ $100 ONLINE REWARD CARD</div>
+        </div>
+        <ul class="text-sm text-white/80 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Work &amp; pro-level gaming</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Full smart home ecosystem</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Symmetric 1 Gbps up/down</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Internet backup w/ wireless</li>
+        </ul>
+        <a href="services.html#plan-1000" class="mt-6 w-full bg-cyanAero text-obsidian py-3 rounded-full font-semibold text-sm hover:bg-white transition flex items-center justify-center gap-2">
+          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- Plan 5000 -->
+      <div class="glass rounded-2xl p-6 hairline flex flex-col hover:border-cyanAero transition">
+        <div class="font-mono text-xs text-white/50 tracking-widest">AT&amp;T INTERNET 5000</div>
+        <div class="font-display font-bold text-2xl mt-2 uppercase">Up to 5 GIG</div>
+        <div class="mt-5">
+          <div class="font-mono text-xs text-white/40 line-through">$135.00/mo</div>
+          <div class="font-display font-bold text-4xl text-white mt-1">$110<span class="text-lg text-white/50">.00/mo</span></div>
+          <div class="font-mono text-[10px] text-cyanAero mt-1">+ $100 ONLINE REWARD CARD</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Cutting-edge technologies</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Supports latest gadgets</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Max speed, immersive</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Internet backup w/ wireless</li>
+        </ul>
+        <a href="services.html#plan-5000" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2">
+          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- No Credit Check Promo + Bundle Calc -->
+    <div class="grid lg:grid-cols-3 gap-4 mb-8">
+      <!-- No Credit Check promo -->
+      <div class="lg:col-span-2 glass rounded-2xl p-8 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(74,110,255,0.1), rgba(18,34,157,0.05)); border: 1px solid rgba(74,110,255,0.3);">
+        <div class="font-mono text-xs text-cyanAero tracking-widest mb-2">SPECIAL — NO CREDIT CHECK</div>
+        <h3 class="font-display font-bold text-4xl md:text-5xl uppercase">Fast Broadband<br/>$29<span class="text-cyanAero">.99</span><span class="text-lg text-white/50">/mo</span></h3>
+        <p class="text-white/70 mt-4 max-w-md">Stream · Work · Game · Connect. Qualifying residential service for new customers — no credit check required. Up to $200 Visa Reward Card upon signup.</p>
+        <div class="flex gap-3 mt-6 flex-wrap">
+          <a href="tel:6462985043" class="bg-cyanAero text-obsidian px-5 py-2.5 rounded-full font-semibold text-sm hover:bg-white transition flex items-center gap-2">
+            <i data-lucide="phone" class="w-4 h-4"></i> Call 646-298-5043
+          </a>
+          <a href="services.html" class="hairline px-5 py-2.5 rounded-full font-semibold text-sm hover:border-cyanAero transition">
+            See all plans
+          </a>
+        </div>
+      </div>
+
+      <!-- Bundle calculator mini -->
+      <div class="glass rounded-2xl p-8">
+        <div class="font-mono text-xs text-white/40 tracking-widest mb-4">BUNDLE SIZE</div>
+        <div class="flex items-end justify-between mb-3">
+          <div>
+            <div class="font-display font-bold text-6xl text-cyanAero tabular-nums tracking-tight" id="sat-count">1</div>
+            <div class="font-mono text-xs text-white/40 mt-1 tracking-widest">WIRELESS LINE(S)</div>
+          </div>
+          <div class="text-right">
+            <div class="font-mono text-xs text-white/40 tracking-widest">SAVINGS</div>
+            <div class="font-display font-bold text-3xl text-blueAero tabular-nums" id="revisit">48<span class="text-xl">H</span></div>
+          </div>
+        </div>
+        <input id="constellation-slider" type="range" min="1" max="24" value="1" />
+        <div class="flex justify-between font-mono text-[10px] text-white/40 mt-2">
+          <span>1</span><span>6</span><span>12</span><span>18</span><span>24</span>
+        </div>
+        <div class="mt-5 pt-5 hairline-t">
+          <div class="font-mono text-xs text-white/40 tracking-widest">EST. MONTHLY</div>
+          <div class="font-display font-bold text-4xl text-white tabular-nums">$<span id="total-cost">0.6</span><span class="text-xl text-white/50">/mo</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison -->
+    <div class="glass rounded-2xl p-8">
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+        <div>
+          <div class="font-display font-bold text-2xl uppercase">Why not just go direct to AT&amp;T?</div>
+          <div class="text-white/60 text-sm font-mono mt-1">Dealer price = same price. Dealer service = better.</div>
+        </div>
+        <div class="font-mono text-xs text-cyanAero flex items-center gap-2">
+          <span class="glow-dot pulse-dot"></span>
+          AUTHORIZED DEALER
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="hairline rounded-xl p-6" style="background: rgba(239,68,68,0.03); border-color: rgba(239,68,68,0.2)">
+          <div class="font-mono text-xs tracking-widest text-red-400">DIRECT TO CARRIER</div>
+          <div class="font-display font-bold text-2xl text-red-400 mt-2">Call-Center Maze</div>
+          <ul class="text-sm text-white/70 mt-4 space-y-2">
+            <li>• 30+ minute hold times</li>
+            <li>• Transferred between departments</li>
+            <li>• Script-driven reps you'll never hear from again</li>
+            <li>• <span class="odo">$<span id="odo-trad">1,840</span></span> is just the number — no human to call back</li>
+          </ul>
+          <div class="h-2 bg-white/5 rounded-full mt-4 overflow-hidden">
+            <div class="h-full bg-red-400" style="width: 100%"></div>
+          </div>
+        </div>
+        <div class="hairline rounded-xl p-6" style="background: rgba(74,110,255,0.03); border-color: rgba(74,110,255,0.3)">
+          <div class="font-mono text-xs tracking-widest text-cyanAero">BROADWAY FAST INTERNET</div>
+          <div class="font-display font-bold text-2xl text-cyanAero mt-2">Same Price · Direct Human</div>
+          <ul class="text-sm text-white/80 mt-4 space-y-2">
+            <li>• Local NY dealer, pick up in 2 minutes</li>
+            <li>• One rep handles your account end-to-end</li>
+            <li>• Same AT&amp;T pricing, same promos, same equipment</li>
+            <li>• <span class="odo">$<span id="odo-eso">47</span></span> for a quote — call back guaranteed</li>
+          </ul>
+          <div class="h-2 bg-white/5 rounded-full mt-4 overflow-hidden">
+            <div class="h-full bg-cyanAero" id="odo-bar" style="width: 3%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-10 text-center">
+        <div class="font-mono text-xs text-white/40 tracking-widest mb-3">READY TO GET ONLINE?</div>
+        <button id="design-mission-btn" class="bg-brand text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-brandBright transition inline-flex items-center gap-3">
+          Get my quote
+          <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FLIGHT HERITAGE ==================== -->
+<section id="heritage" class="section-pad">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-14 text-center">
+      <div class="font-mono text-xs text-cyanAero tracking-widest mb-3">ABOUT BROADWAY</div>
+      <h2 class="font-display font-bold text-4xl md:text-5xl uppercase">A New York Dealer<br/>Built for Real Customers</h2>
+      <p class="text-white/60 mt-4 max-w-2xl mx-auto">Broadway Power LLC is a New York-based company specializing in residential internet and wireless sales. We help customers explore available plans, check service availability, compare offers, and complete activation through authorized dealer channels.</p>
+    </div>
+
+    <!-- Counters -->
+    <div class="grid md:grid-cols-3 gap-4 mb-10">
+      <div class="glass p-8 rounded-2xl text-center">
+        <i data-lucide="users" class="w-8 h-8 text-cyanAero mx-auto mb-3"></i>
+        <div class="font-display font-bold text-5xl text-cyanAero tabular-nums" id="count-sats">2500+</div>
+        <div class="font-mono text-xs text-white/50 tracking-widest mt-2">HOUSEHOLDS CONNECTED</div>
+      </div>
+      <div class="glass p-8 rounded-2xl text-center">
+        <i data-lucide="zap" class="w-8 h-8 text-cyanAero mx-auto mb-3"></i>
+        <div class="font-display font-bold text-5xl text-cyanAero tabular-nums" id="count-data">24<span class="text-xl">H</span></div>
+        <div class="font-mono text-xs text-white/50 tracking-widest mt-2">AVG ACTIVATION TIME</div>
+      </div>
+      <div class="glass p-8 rounded-2xl text-center">
+        <i data-lucide="star" class="w-8 h-8 text-cyanAero mx-auto mb-3"></i>
+        <div class="font-display font-bold text-5xl text-cyanAero tabular-nums" id="count-years">4.9<span class="text-xl">/5</span></div>
+        <div class="font-mono text-xs text-white/50 tracking-widest mt-2">AVG CUSTOMER RATING</div>
+      </div>
+    </div>
+
+    <!-- Partner carriers grid -->
+    <div>
+      <div class="text-center font-mono text-xs text-white/50 tracking-widest mb-6">AUTHORIZED SALES CHANNEL</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="glass hairline p-6 rounded-xl text-center font-display font-bold text-xl tracking-widest">AT&amp;T</div>
+        <div class="glass hairline p-6 rounded-xl text-center font-display font-bold text-xl tracking-widest">FIBER</div>
+        <div class="glass hairline p-6 rounded-xl text-center font-display font-bold text-xl tracking-widest">WIRELESS</div>
+        <div class="you-card p-6 rounded-xl text-center font-display font-bold text-xl tracking-widest text-cyanAero">You Next?</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="section-pad glass hairline-t">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid md:grid-cols-5 gap-10 mb-14">
+      <div class="md:col-span-2">
+        <div class="mb-4">
+          <img src="Broadway1.png" alt="Broadway Fast Internet" class="broadway-img h-28 w-auto" />
+        </div>
+        <p class="text-white/50 text-sm mb-4 max-w-sm">Broadway Power LLC is a New York-based residential internet &amp; wireless sales company. Authorized dealer channel for AT&amp;T Fiber, AT&amp;T Home Internet, and AT&amp;T Wireless plans.</p>
+        <div id="footer-contact" class="font-mono text-xs text-white/60 leading-relaxed space-y-1">
+          <div class="flex items-start gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-cyanAero mt-0.5"></i> Bronx, New York, USA</div>
+          <div class="flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-cyanAero"></i> <a href="tel:6462985043" class="hover:text-cyanAero">646-298-5043</a></div>
+          <div class="flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-cyanAero"></i> <a href="mailto:Broadwaypower25@gmail.com" class="hover:text-cyanAero break-all">Broadwaypower25@gmail.com</a></div>
+        </div>
+      </div>
+      <div>
+        <div class="font-mono text-xs text-white/40 tracking-widest mb-4">COMPANY</div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#heritage" class="hover:text-cyanAero">About Broadway</a></li>
+          <li><a href="services.html" class="hover:text-cyanAero">Services &amp; Prices</a></li>
+          <li><a href="#costing" class="hover:text-cyanAero">Plans</a></li>
+          <li><a href="#footer-contact" class="hover:text-cyanAero">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-mono text-xs text-white/40 tracking-widest mb-4">AT&amp;T INTERNET</div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="services.html#plan-300" class="hover:text-cyanAero">Internet 300</a></li>
+          <li><a href="services.html#plan-500" class="hover:text-cyanAero">Internet 500</a></li>
+          <li><a href="services.html#plan-1000" class="hover:text-cyanAero">Internet 1 GIG</a></li>
+          <li><a href="services.html#plan-5000" class="hover:text-cyanAero">Internet 5 GIG</a></li>
+          <li><a href="services.html#no-credit" class="hover:text-cyanAero">No Credit Check</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-mono text-xs text-white/40 tracking-widest mb-4">OUR SERVICES</div>
+        <ul class="space-y-2 text-sm">
+          <li><a class="hover:text-cyanAero">Internet Sales</a></li>
+          <li><a class="hover:text-cyanAero">Wireless Sales</a></li>
+          <li><a class="hover:text-cyanAero">Service Activation</a></li>
+          <li><a class="hover:text-cyanAero">Customer Acquisition</a></li>
+          <li><a class="hover:text-cyanAero">Account Support</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Call CTA -->
+    <div class="glass p-6 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 mb-10">
+      <div>
+        <div class="font-display font-bold text-lg uppercase">Ready to get connected?</div>
+        <div class="text-white/50 text-sm">Call us for a free availability check and plan quote — no obligation.</div>
+      </div>
+      <div class="flex gap-2 w-full md:w-auto">
+        <a href="tel:6462985043" class="bg-brand text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center gap-2">
+          <i data-lucide="phone" class="w-4 h-4"></i> Call 646-298-5043
+        </a>
+        <a href="mailto:Broadwaypower25@gmail.com" class="hairline px-6 py-2.5 rounded-full font-semibold text-sm hover:border-cyanAero transition flex items-center gap-2">
+          <i data-lucide="mail" class="w-4 h-4"></i> Email
+        </a>
+      </div>
+    </div>
+
+    <div class="hairline-t pt-6 flex flex-col md:flex-row items-center justify-between gap-3 font-mono text-xs text-white/40 tracking-widest">
+      <div>© 2026 BROADWAY POWER LLC · ALL RIGHTS RESERVED · AUTHORIZED AT&amp;T DEALER</div>
+      <div class="flex items-center gap-5">
+        <a class="hover:text-cyanAero">PRIVACY</a>
+        <a class="hover:text-cyanAero">TERMS</a>
+        <a class="hover:text-cyanAero">COOKIES</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<!-- ==================== MISSION SUMMARY MODAL ==================== -->
+<div id="mission-modal" class="modal-backdrop">
+  <div class="glass-strong rounded-2xl p-10 max-w-2xl w-[90%] relative">
+    <button id="modal-close" class="absolute top-5 right-5 text-white/60 hover:text-white">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+    <div class="font-mono text-xs text-cyanAero tracking-widest mb-2">YOUR QUOTE</div>
+    <h3 class="font-display font-bold text-3xl uppercase mb-6">Order Summary</h3>
+
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="hairline rounded-lg p-4">
+        <div class="font-mono text-[10px] text-white/40 tracking-widest">CARRIER</div>
+        <div class="font-display font-bold text-xl mt-1" id="mod-platform">AT&amp;T FIBER</div>
+      </div>
+      <div class="hairline rounded-lg p-4">
+        <div class="font-mono text-[10px] text-white/40 tracking-widest">PLAN</div>
+        <div class="font-display font-bold text-xl mt-1 text-cyanAero" id="mod-payload">—</div>
+      </div>
+      <div class="hairline rounded-lg p-4">
+        <div class="font-mono text-[10px] text-white/40 tracking-widest">WIRELESS LINES</div>
+        <div class="font-display font-bold text-xl mt-1" id="mod-count">1</div>
+      </div>
+      <div class="hairline rounded-lg p-4">
+        <div class="font-mono text-[10px] text-white/40 tracking-widest">INSTALL</div>
+        <div class="font-display font-bold text-xl mt-1" id="mod-revisit">24H</div>
+      </div>
+    </div>
+
+    <div class="border border-cyanAero/40 rounded-xl p-5 mb-6 bg-cyanAero/5">
+      <div class="font-mono text-xs text-white/60 tracking-widest mb-1">ESTIMATED MONTHLY</div>
+      <div class="font-display font-bold text-5xl text-cyanAero">$<span id="mod-cost">0.6</span><span class="text-xl text-white/50">/mo</span></div>
+      <div class="font-mono text-xs text-white/40 mt-2">+ taxes &amp; fees · no contract</div>
+    </div>
+
+    <div class="flex gap-3 flex-wrap">
+      <a href="tel:6462985043" class="flex-1 bg-brand text-white py-3 rounded-full font-semibold hover:bg-brandBright transition flex items-center justify-center gap-2 min-w-[180px]">
+        <i data-lucide="phone" class="w-4 h-4"></i>
+        Call 646-298-5043
+      </a>
+      <a href="mailto:Broadwaypower25@gmail.com" class="hairline px-6 py-3 rounded-full font-semibold hover:border-cyanAero transition flex items-center gap-2">
+        <i data-lucide="mail" class="w-4 h-4"></i>
+        Email us
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script>
+// Initialize Lucide icons
+lucide.createIcons();
+
+/* =============================================================
+   THREE.JS: SCENE, SATELLITE, STARFIELD, ORBIT RING, ANIMATION
+   ============================================================= */
+
+const container = document.getElementById('three-canvas');
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x050507, 20, 90);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(6, 2.5, 10);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x050507, 1);
+container.appendChild(renderer.domElement);
+
+// Lighting
+const ambient = new THREE.AmbientLight(0x8aa0b8, 0.35);
+scene.add(ambient);
+
+const sun = new THREE.DirectionalLight(0xfff1d6, 1.4);
+sun.position.set(10, 8, 5);
+scene.add(sun);
+
+const rimCyan = new THREE.PointLight(0x4A6EFF, 2.0, 25);
+rimCyan.position.set(-6, 2, -4);
+scene.add(rimCyan);
+
+const rimBlue = new THREE.PointLight(0x4A6EFF, 1.5, 25);
+rimBlue.position.set(5, -3, 6);
+scene.add(rimBlue);
+
+// -------------------- GLOBE GROUP --------------------
+// Note: variable is named `satellite` for compatibility with downstream rotation/scale/traverse code
+const satellite = new THREE.Group();
+scene.add(satellite);
+
+const GLOBE_R = 2.5;
+const wireMat = new THREE.LineBasicMaterial({ color: 0x4A6EFF, transparent: true, opacity: 0.4 });
+
+// Core globe sphere — dark navy "ocean" with subtle emissive
+const globeMat = new THREE.MeshStandardMaterial({
+  color: 0x071226,
+  emissive: 0x0a2a4a,
+  emissiveIntensity: 0.35,
+  metalness: 0.15,
+  roughness: 0.75,
+});
+const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R, 64, 64), globeMat);
+satellite.add(globeMesh);
+
+// Lat/lon wireframe overlay
+const gridGeo = new THREE.SphereGeometry(GLOBE_R * 1.004, 36, 18);
+const gridMesh = new THREE.LineSegments(new THREE.WireframeGeometry(gridGeo), wireMat);
+satellite.add(gridMesh);
+
+// Procedural "continents" as scattered glowing dots on the surface
+function makeContinentPoints() {
+  const geo = new THREE.BufferGeometry();
+  const count = 2200;
+  const pos = new Float32Array(count * 3);
+  const col = new Float32Array(count * 3);
+  // Use a few noise "hotspots" to cluster land-like shapes
+  const hotspots = [];
+  for (let h = 0; h < 7; h++) {
+    hotspots.push({
+      lat: (Math.random() - 0.5) * Math.PI,
+      lon: Math.random() * Math.PI * 2,
+      size: 0.4 + Math.random() * 0.9,
+    });
+  }
+  let idx = 0;
+  while (idx < count) {
+    const lat = (Math.random() - 0.5) * Math.PI;
+    const lon = Math.random() * Math.PI * 2;
+    let densityScore = 0;
+    hotspots.forEach(h => {
+      const d = Math.acos(
+        Math.sin(lat) * Math.sin(h.lat) +
+        Math.cos(lat) * Math.cos(h.lat) * Math.cos(lon - h.lon)
+      );
+      if (d < h.size) densityScore += (1 - d / h.size);
+    });
+    if (densityScore > 0.5 || Math.random() < 0.08) {
+      const r = GLOBE_R * 1.012;
+      pos[idx * 3]     = r * Math.cos(lat) * Math.cos(lon);
+      pos[idx * 3 + 1] = r * Math.sin(lat);
+      pos[idx * 3 + 2] = r * Math.cos(lat) * Math.sin(lon);
+      const bright = 0.6 + Math.random() * 0.4;
+      col[idx * 3]     = 0.1;
+      col[idx * 3 + 1] = 0.7 * bright;
+      col[idx * 3 + 2] = 0.9 * bright;
+      idx++;
+    }
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  return geo;
+}
+const continentPts = new THREE.Points(
+  makeContinentPoints(),
+  new THREE.PointsMaterial({ size: 0.045, vertexColors: true, transparent: true, opacity: 0.95 })
+);
+satellite.add(continentPts);
+
+// Atmosphere glow — back-side sphere with Fresnel-ish shader
+const atmosphereMat = new THREE.ShaderMaterial({
+  transparent: true,
+  side: THREE.BackSide,
+  uniforms: {
+    glowColor: { value: new THREE.Color(0x4A6EFF) },
+    power:     { value: 2.2 },
+    intensity: { value: 1.2 },
+  },
+  vertexShader: `
+    varying vec3 vNormal;
+    varying vec3 vViewPosition;
+    void main() {
+      vNormal = normalize(normalMatrix * normal);
+      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+      vViewPosition = -mvPosition.xyz;
+      gl_Position = projectionMatrix * mvPosition;
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 glowColor;
+    uniform float power;
+    uniform float intensity;
+    varying vec3 vNormal;
+    varying vec3 vViewPosition;
+    void main() {
+      vec3 viewDir = normalize(vViewPosition);
+      float rim = pow(1.0 - abs(dot(vNormal, viewDir)), power);
+      gl_FragColor = vec4(glowColor * rim * intensity, rim);
+    }
+  `
+});
+const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R * 1.18, 64, 64), atmosphereMat);
+satellite.add(atmosphere);
+
+// Inner atmosphere (near-surface haze, front side)
+const hazeMat = new THREE.ShaderMaterial({
+  transparent: true,
+  side: THREE.FrontSide,
+  depthWrite: false,
+  uniforms: {
+    glowColor: { value: new THREE.Color(0x4A6EFF) },
+    power:     { value: 3.0 },
+    intensity: { value: 0.6 },
+  },
+  vertexShader: atmosphereMat.vertexShader,
+  fragmentShader: atmosphereMat.fragmentShader,
+});
+const haze = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R * 1.03, 64, 64), hazeMat);
+satellite.add(haze);
+
+// -------------------- ORBITING FLEET SATELLITES (compat: leftWing/rightWing) --------------------
+function makeOrbitalSat(hue) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18, 0.14, 0.14),
+    new THREE.MeshStandardMaterial({ color: 0x1b1f29, metalness: 0.9, roughness: 0.35 })
+  );
+  g.add(body);
+  // Two tiny panels
+  for (let s of [-1, 1]) {
+    const panel = new THREE.Mesh(
+      new THREE.BoxGeometry(0.28, 0.02, 0.14),
+      new THREE.MeshStandardMaterial({
+        color: 0x0b2545,
+        emissive: hue,
+        emissiveIntensity: 0.4,
+        metalness: 0.3,
+        roughness: 0.4
+      })
+    );
+    panel.position.x = s * 0.26;
+    g.add(panel);
+    g.add(new THREE.LineSegments(
+      new THREE.EdgesGeometry(panel.geometry),
+      new THREE.LineBasicMaterial({ color: hue, transparent: true, opacity: 0.6 })
+    ));
+  }
+  g.add(new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry), new THREE.LineBasicMaterial({ color: 0x4A6EFF, transparent: true, opacity: 0.5 })));
+  return g;
+}
+// Named leftWing/rightWing to keep updateTech() emissive brighten + animate() rotation.z working.
+const leftWing  = makeOrbitalSat(0x4A6EFF);
+const rightWing = makeOrbitalSat(0x4A6EFF);
+satellite.add(leftWing);
+satellite.add(rightWing);
+
+// -------------------- SURFACE SCANNER PULSE (compat: lensMat / lensGlass / ringMat / payloadRing) --------------------
+// Positioned on globe surface — represents the "payload footprint" that pulses on pill click.
+const surfacePayload = new THREE.Group();
+satellite.add(surfacePayload);
+// Place at (lat 30, lon 20) ish
+(function placeSurface(group, latDeg, lonDeg, radius) {
+  const lat = THREE.MathUtils.degToRad(latDeg);
+  const lon = THREE.MathUtils.degToRad(lonDeg);
+  const r = radius;
+  group.position.set(
+    r * Math.cos(lat) * Math.cos(lon),
+    r * Math.sin(lat),
+    r * Math.cos(lat) * Math.sin(lon)
+  );
+  group.lookAt(0, 0, 0);
+  group.rotateX(Math.PI);
+})(surfacePayload, 32, 20, GLOBE_R * 1.001);
+
+const lensMat = new THREE.MeshStandardMaterial({
+  color: 0x4A6EFF,
+  emissive: 0x4A6EFF,
+  emissiveIntensity: 0.5,
+  metalness: 0.4,
+  roughness: 0.3,
+  transparent: true,
+  opacity: 0.9
+});
+const lens = new THREE.Mesh(new THREE.CircleGeometry(0.25, 32), lensMat);
+surfacePayload.add(lens);
+
+const lensGlass = new THREE.Mesh(
+  new THREE.CircleGeometry(0.14, 32),
+  new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    emissive: 0x4A6EFF,
+    emissiveIntensity: 0.9,
+    transparent: true,
+    opacity: 0.95
+  })
+);
+lensGlass.position.z = 0.01;
+surfacePayload.add(lensGlass);
+
+const ringMat = new THREE.MeshBasicMaterial({ color: 0x4A6EFF, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
+const payloadRing = new THREE.Mesh(new THREE.RingGeometry(0.28, 0.32, 48), ringMat);
+payloadRing.position.z = 0.005;
+surfacePayload.add(payloadRing);
+
+// -------------------- GROUND STATION BEACON (compat: dishMat / antennaSphere) --------------------
+const surfaceAntenna = new THREE.Group();
+satellite.add(surfaceAntenna);
+(function placeSurface(group, latDeg, lonDeg, radius) {
+  const lat = THREE.MathUtils.degToRad(latDeg);
+  const lon = THREE.MathUtils.degToRad(lonDeg);
+  const r = radius;
+  group.position.set(
+    r * Math.cos(lat) * Math.cos(lon),
+    r * Math.sin(lat),
+    r * Math.cos(lat) * Math.sin(lon)
+  );
+  group.lookAt(0, 0, 0);
+  group.rotateX(Math.PI);
+})(surfaceAntenna, -20, -140, GLOBE_R * 1.001);
+
+const dishMat = new THREE.MeshStandardMaterial({
+  color: 0x4A6EFF,
+  emissive: 0x4A6EFF,
+  emissiveIntensity: 0.5,
+  metalness: 0.4,
+  roughness: 0.3,
+  transparent: true,
+  opacity: 0.9
+});
+const dishHub = new THREE.Mesh(new THREE.CircleGeometry(0.2, 32), dishMat);
+surfaceAntenna.add(dishHub);
+
+const antennaSphere = new THREE.Mesh(
+  new THREE.SphereGeometry(0.07, 16, 16),
+  new THREE.MeshStandardMaterial({ color: 0x4A6EFF, emissive: 0x4A6EFF, emissiveIntensity: 1.1 })
+);
+antennaSphere.position.z = 0.04;
+surfaceAntenna.add(antennaSphere);
+
+// Radiating signal rings for antenna
+for (let i = 0; i < 3; i++) {
+  const sigRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.22 + i * 0.07, 0.235 + i * 0.07, 36),
+    new THREE.MeshBasicMaterial({ color: 0x4A6EFF, transparent: true, opacity: 0.35 - i * 0.1, side: THREE.DoubleSide })
+  );
+  sigRing.position.z = 0.002;
+  surfaceAntenna.add(sigRing);
+}
+
+// -------------------- ORBITAL RINGS (encircle the globe) --------------------
+const orbitRadius = GLOBE_R * 1.45;
+function makeOrbitRing(radius, inclinationDeg, color, opacity) {
+  const pts = [];
+  for (let i = 0; i <= 128; i++) {
+    const theta = (i / 128) * Math.PI * 2;
+    pts.push(new THREE.Vector3(Math.cos(theta) * radius, 0, Math.sin(theta) * radius));
+  }
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  const line = new THREE.Line(geo, new THREE.LineDashedMaterial({
+    color, transparent: true, opacity, dashSize: 0.2, gapSize: 0.15
+  }));
+  line.computeLineDistances();
+  line.rotation.x = THREE.MathUtils.degToRad(inclinationDeg);
+  return line;
+}
+const orbitRing  = makeOrbitRing(orbitRadius,         0, 0x4A6EFF, 0.4);  // equatorial
+const orbitRing2 = makeOrbitRing(orbitRadius * 1.15, 55, 0x4A6EFF, 0.3);  // inclined SSO-ish
+const orbitRing3 = makeOrbitRing(orbitRadius * 1.3,  97, 0x4A6EFF, 0.2);  // polar
+satellite.add(orbitRing);
+satellite.add(orbitRing2);
+satellite.add(orbitRing3);
+
+// Tiny orbiting marker (child of globe so it rotates with the frame)
+const orbMarker = new THREE.Mesh(
+  new THREE.SphereGeometry(0.08, 12, 12),
+  new THREE.MeshBasicMaterial({ color: 0x4A6EFF })
+);
+satellite.add(orbMarker);
+
+// -------------------- STARFIELD --------------------
+const starGeo = new THREE.BufferGeometry();
+const starCount = 1200;
+const positions = new Float32Array(starCount * 3);
+const starColors = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i++) {
+  const r = 60 + Math.random() * 30;
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos((Math.random() * 2) - 1);
+  positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+  positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+  positions[i*3+2] = r * Math.cos(phi);
+  const b = 0.5 + Math.random() * 0.5;
+  starColors[i*3] = b * 0.9; starColors[i*3+1] = b * 0.95; starColors[i*3+2] = b;
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+const starMat = new THREE.PointsMaterial({ size: 0.15, vertexColors: true, transparent: true, opacity: 0.9 });
+const starfield = new THREE.Points(starGeo, starMat);
+scene.add(starfield);
+
+// Thin space nebula (cheap)
+const nebulaGeo = new THREE.SphereGeometry(55, 32, 32);
+const nebulaMat = new THREE.MeshBasicMaterial({
+  color: 0x060a18,
+  side: THREE.BackSide,
+  transparent: true,
+  opacity: 0.7
+});
+scene.add(new THREE.Mesh(nebulaGeo, nebulaMat));
+
+/* -------------------- UPLINK LASER BEAM (from ground beacon to orbit) -------------------- */
+const laserMat = new THREE.LineBasicMaterial({ color: 0x4A6EFF, transparent: true, opacity: 0, linewidth: 2 });
+const laserOrigin = surfaceAntenna.position.clone().multiplyScalar(1.0);
+const laserTarget = surfaceAntenna.position.clone().multiplyScalar(2.6);
+const laserGeo = new THREE.BufferGeometry().setFromPoints([ laserOrigin, laserTarget ]);
+const laser = new THREE.Line(laserGeo, laserMat);
+satellite.add(laser);
+
+/* =============================================================
+   X-RAY WIREFRAME MODE TOGGLE
+   ============================================================= */
+let xray = false;
+const originalMats = [];
+
+satellite.traverse((obj) => {
+  if (obj.isMesh) {
+    originalMats.push({ mesh: obj, mat: obj.material });
+  }
+});
+
+function setXray(enabled) {
+  xray = enabled;
+  if (enabled) {
+    originalMats.forEach(({ mesh }) => {
+      mesh.material = new THREE.MeshBasicMaterial({
+        color: 0x4A6EFF,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.9
+      });
+    });
+  } else {
+    originalMats.forEach(({ mesh, mat }) => mesh.material = mat);
+  }
+  document.querySelectorAll('#xray-toggle, #xray-toggle-2').forEach(el => {
+    el.classList.toggle('border-cyanAero', enabled);
+    el.classList.toggle('text-cyanAero', enabled);
+  });
+}
+
+document.getElementById('xray-toggle').addEventListener('click', () => setXray(!xray));
+document.getElementById('xray-toggle-2').addEventListener('click', () => setXray(!xray));
+
+/* =============================================================
+   INTERACTIVITY: MOUSE DRAG, PARALLAX, SCROLL CHOREOGRAPHY
+   ============================================================= */
+const mouse = { x: 0, y: 0, nx: 0, ny: 0, dragging: false, dragStartX: 0, dragStartY: 0 };
+let userRotation = { x: 0, y: 0 };
+let autoYaw = 0;
+let scrollRotTargetX = 0;
+let scrollRotTargetY = 0;
+let camTargetPos = new THREE.Vector3(6, 2.5, 10);
+let satTargetScale = 1.0;
+
+window.addEventListener('mousemove', (e) => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+  mouse.nx = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.ny = -((e.clientY / window.innerHeight) * 2 - 1);
+
+  const reticle = document.getElementById('drag-reticle');
+  if (reticle) {
+    const parent = reticle.parentElement.getBoundingClientRect();
+    const relX = e.clientX - parent.left;
+    const relY = e.clientY - parent.top;
+    if (relX >= 0 && relX <= parent.width && relY >= 0 && relY <= parent.height) {
+      reticle.style.left = relX + 'px';
+      reticle.style.top = relY + 'px';
+      reticle.style.transform = 'translate(-50%, -50%)';
+      reticle.style.opacity = '1';
+    } else {
+      reticle.style.opacity = '0.3';
+    }
+  }
+
+  if (mouse.dragging) {
+    userRotation.y += (e.clientX - mouse.dragStartX) * 0.005;
+    userRotation.x += (e.clientY - mouse.dragStartY) * 0.005;
+    userRotation.x = Math.max(-1.3, Math.min(1.3, userRotation.x));
+    mouse.dragStartX = e.clientX;
+    mouse.dragStartY = e.clientY;
+  }
+});
+container.addEventListener('mousedown', (e) => {
+  mouse.dragging = true;
+  mouse.dragStartX = e.clientX;
+  mouse.dragStartY = e.clientY;
+  container.style.cursor = 'grabbing';
+});
+window.addEventListener('mouseup', () => {
+  mouse.dragging = false;
+  container.style.cursor = 'grab';
+});
+container.style.cursor = 'grab';
+
+/* ---------- Scroll Choreography ---------- */
+const sections = {
+  hero:     { camPos: [6, 2.5, 10],   satRot: [0, 0, 0] },
+  timeline: { camPos: [4, 3.5, 10],   satRot: [0.3, 0.8, 0.1] },
+  step1:    { camPos: [0, -2, 7],     satRot: [-0.8, 1.5, 0.2] }, // zoom to payload bay
+  step2:    { camPos: [10, 5, 14],    satRot: [0.5, 2.6, 0] },    // orbital fleet view
+  tech:     { camPos: [5, 0, 8],      satRot: [0.2, 3.2, 0.3] },  // exploded/x-ray
+  costing:  { camPos: [-6, 2, 10],    satRot: [0.1, 4.0, 0] },
+  heritage: { camPos: [0, 6, 12],     satRot: [1.0, 4.5, 0] },
+};
+const sectionIds = Object.keys(sections);
+
+function updateFromScroll() {
+  const scroll = window.scrollY;
+  const vh = window.innerHeight;
+
+  // Which section is user in?
+  let currentSec = sectionIds[0];
+  let nextSec = sectionIds[0];
+  let localProgress = 0;
+
+  for (let i = 0; i < sectionIds.length; i++) {
+    const el = document.getElementById(sectionIds[i]);
+    if (!el) continue;
+    const rect = el.getBoundingClientRect();
+    const top = rect.top + window.scrollY;
+    const bottom = top + rect.height;
+    if (scroll + vh * 0.5 >= top && scroll + vh * 0.5 < bottom) {
+      currentSec = sectionIds[i];
+      nextSec = sectionIds[Math.min(i + 1, sectionIds.length - 1)];
+      localProgress = (scroll + vh * 0.5 - top) / rect.height;
+      break;
+    }
+  }
+
+  const curDef = sections[currentSec];
+  const nextDef = sections[nextSec];
+  camTargetPos.set(
+    THREE.MathUtils.lerp(curDef.camPos[0], nextDef.camPos[0], localProgress),
+    THREE.MathUtils.lerp(curDef.camPos[1], nextDef.camPos[1], localProgress),
+    THREE.MathUtils.lerp(curDef.camPos[2], nextDef.camPos[2], localProgress)
+  );
+  scrollRotTargetX = THREE.MathUtils.lerp(curDef.satRot[0], nextDef.satRot[0], localProgress);
+  scrollRotTargetY = THREE.MathUtils.lerp(curDef.satRot[1], nextDef.satRot[1], localProgress);
+
+  // Auto-toggle x-ray when in tech section
+  if (currentSec === 'tech' && localProgress > 0.5 && !xray) {
+    // soft hint: don't force; let user toggle
+  }
+
+  // Update progress bar
+  const docH = document.body.scrollHeight - window.innerHeight;
+  const pct = Math.min(100, Math.max(0, (scroll / docH) * 100));
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  // Progress steps
+  const stepMap = ['hero timeline step1', 'step2', 'tech', 'costing'];
+  const sectionIndex = sectionIds.indexOf(currentSec);
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.querySelector(`#prog-${i} .step-dot`);
+    const txt = document.getElementById(`prog-${i}`);
+    const activeTill = [3, 4, 5, 6][i-1];
+    if (sectionIndex >= activeTill - 1) {
+      dot.classList.add('active');
+      txt.classList.remove('text-white/40');
+      txt.classList.add('text-cyanAero');
+    } else if (i === 1) {
+      dot.classList.add('active');
+      txt.classList.add('text-cyanAero');
+    } else {
+      dot.classList.remove('active');
+      txt.classList.remove('text-cyanAero');
+      txt.classList.add('text-white/40');
+    }
+  }
+}
+
+window.addEventListener('scroll', updateFromScroll, { passive: true });
+
+/* =============================================================
+   PAYLOAD HIGHLIGHT PULSES
+   ============================================================= */
+let payloadPulseActive = false;
+let payloadPulseTime = 0;
+let antennaPulseActive = false;
+let antennaPulseTime = 0;
+
+function pulsePayload() {
+  payloadPulseActive = true;
+  payloadPulseTime = 0;
+}
+function pulseAntenna() {
+  antennaPulseActive = true;
+  antennaPulseTime = 0;
+}
+
+/* =============================================================
+   RESIZE
+   ============================================================= */
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* =============================================================
+   ANIMATION LOOP
+   ============================================================= */
+const clock = new THREE.Clock();
+let lastFrame = performance.now();
+let fps = 60;
+let startTime = Date.now();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+  const dt = clock.getDelta();
+
+  // Autonomous idle rotation
+  autoYaw += dt * 0.25;
+
+  // Smooth sat rotation: scroll target + idle + user drag + mouse parallax
+  const parallaxX = mouse.ny * 0.1;
+  const parallaxY = mouse.nx * 0.15;
+
+  satellite.rotation.x = THREE.MathUtils.lerp(satellite.rotation.x, scrollRotTargetX + userRotation.x + parallaxX, 0.06);
+  satellite.rotation.y = THREE.MathUtils.lerp(satellite.rotation.y, scrollRotTargetY + autoYaw + userRotation.y + parallaxY, 0.06);
+  satellite.rotation.z = Math.sin(t * 0.3) * 0.02;
+
+  // Subtle gravitational float
+  satellite.position.y = Math.sin(t * 0.5) * 0.1;
+
+  // Scale lerp
+  satellite.scale.x = THREE.MathUtils.lerp(satellite.scale.x, satTargetScale, 0.05);
+  satellite.scale.y = THREE.MathUtils.lerp(satellite.scale.y, satTargetScale, 0.05);
+  satellite.scale.z = THREE.MathUtils.lerp(satellite.scale.z, satTargetScale, 0.05);
+
+  // Orbit fleet satellites around the globe
+  // leftWing — along equatorial orbit (orbitRing)
+  const ang1 = t * 0.6;
+  leftWing.position.set(Math.cos(ang1) * orbitRadius, 0, Math.sin(ang1) * orbitRadius);
+  leftWing.rotation.y = -ang1 + Math.PI / 2;
+  leftWing.rotation.z = Math.sin(t * 0.4) * 0.12;
+
+  // rightWing — along inclined orbit (orbitRing2 at 55°)
+  const ang2 = t * 0.45 + Math.PI;
+  const incl = THREE.MathUtils.degToRad(55);
+  const r2 = orbitRadius * 1.15;
+  rightWing.position.set(
+    Math.cos(ang2) * r2,
+    Math.sin(ang2) * r2 * Math.sin(incl),
+    Math.sin(ang2) * r2 * Math.cos(incl)
+  );
+  rightWing.rotation.y = -ang2;
+  rightWing.rotation.z = -Math.sin(t * 0.4) * 0.12;
+
+  // Camera lerp
+  camera.position.lerp(camTargetPos, 0.04);
+  camera.lookAt(satellite.position);
+
+  // Orbit marker — along polar orbit (orbitRing3 at 97°)
+  const ang3 = t * 0.8;
+  const incl3 = THREE.MathUtils.degToRad(97);
+  const r3 = orbitRadius * 1.3;
+  orbMarker.position.set(
+    Math.cos(ang3) * r3,
+    Math.sin(ang3) * r3 * Math.sin(incl3),
+    Math.sin(ang3) * r3 * Math.cos(incl3)
+  );
+
+  // Starfield slow drift
+  starfield.rotation.y += dt * 0.01;
+
+  // Payload pulse
+  if (payloadPulseActive) {
+    payloadPulseTime += dt;
+    const p = Math.max(0, 1 - payloadPulseTime / 2.5);
+    lensMat.emissiveIntensity = p * 1.5;
+    lensGlass.material.emissiveIntensity = 0.6 + p * 1.5;
+    ringMat.opacity = 0.9;
+    payloadRing.scale.setScalar(1 + Math.sin(payloadPulseTime * 8) * 0.2 * p);
+    if (p === 0) {
+      payloadPulseActive = false;
+      lensMat.emissiveIntensity = 0;
+      lensGlass.material.emissiveIntensity = 0.6;
+      payloadRing.scale.setScalar(1);
+    }
+  }
+
+  // Antenna pulse
+  if (antennaPulseActive) {
+    antennaPulseTime += dt;
+    const p = Math.max(0, 1 - antennaPulseTime / 2.5);
+    dishMat.emissiveIntensity = p * 1.0;
+    antennaSphere.material.emissiveIntensity = 0.9 + p * 2;
+    antennaSphere.scale.setScalar(1 + Math.sin(antennaPulseTime * 10) * 0.3 * p);
+    if (p === 0) {
+      antennaPulseActive = false;
+      dishMat.emissiveIntensity = 0;
+      antennaSphere.material.emissiveIntensity = 0.9;
+      antennaSphere.scale.setScalar(1);
+    }
+  }
+
+  // Laser beam
+  if (laserMat.opacity > 0) {
+    laserMat.opacity -= dt * 0.4;
+    laser.scale.y = 1 + Math.sin(t * 20) * 0.1;
+  }
+
+  renderer.render(scene, camera);
+
+  // HUD updates
+  const pitch = THREE.MathUtils.radToDeg(satellite.rotation.x);
+  const yaw   = THREE.MathUtils.radToDeg(satellite.rotation.y) % 360;
+  const roll  = THREE.MathUtils.radToDeg(satellite.rotation.z);
+  const fmt = v => (v >= 0 ? '+' : '') + v.toFixed(2) + '°';
+  document.getElementById('hud-pitch').textContent = fmt(pitch);
+  document.getElementById('hud-yaw').textContent = fmt(yaw);
+  document.getElementById('hud-roll').textContent = fmt(roll);
+
+  // Rolling coordinates
+  document.getElementById('hud-lat').textContent =
+    (Math.sin(t * 0.15) * 60).toFixed(4).padStart(8, ' ');
+  document.getElementById('hud-lon').textContent =
+    (Math.cos(t * 0.15) * 180).toFixed(4).padStart(8, ' ');
+
+  // T+ counter
+  const total = (Date.now() - startTime) / 1000;
+  const hh = String(Math.floor(total / 3600)).padStart(3, '0');
+  const mm = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+  const ss = String(Math.floor(total % 60)).padStart(2, '0');
+  document.getElementById('hud-time').textContent = `${hh}:${mm}:${ss}`;
+
+  // FPS
+  const now = performance.now();
+  fps = 1000 / (now - lastFrame);
+  lastFrame = now;
+  if (Math.floor(t * 2) % 2 === 0) {
+    document.getElementById('hud-fps').textContent = Math.round(fps);
+  }
+}
+animate();
+
+/* =============================================================
+   UI: MEGA MENU
+   ============================================================= */
+const megaMenu = document.getElementById('mega-menu');
+const satTrigger = document.getElementById('sat-menu-trigger');
+let megaOpen = false;
+satTrigger.addEventListener('click', (e) => {
+  e.stopPropagation();
+  megaOpen = !megaOpen;
+  megaMenu.classList.toggle('open', megaOpen);
+});
+document.addEventListener('click', (e) => {
+  if (megaOpen && !megaMenu.contains(e.target) && !satTrigger.contains(e.target)) {
+    megaOpen = false;
+    megaMenu.classList.remove('open');
+  }
+});
+
+// Platform scale binding
+const scaleMap = { frameS: 0.85, frameL: 1.1, frameMax: 1.35 };
+let currentPlatform = 'FRAME S';
+document.querySelectorAll('.platform-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const key = card.dataset.platform;
+    satTargetScale = scaleMap[key];
+    currentPlatform = card.querySelector('.font-display').textContent;
+    document.getElementById('mod-platform').textContent = currentPlatform;
+    document.querySelectorAll('.platform-card').forEach(c => c.style.borderColor = '');
+    card.style.borderColor = '#4A6EFF';
+    megaOpen = false;
+    megaMenu.classList.remove('open');
+  });
+});
+
+/* =============================================================
+   UI: APPLICATION CONFIGURATOR
+   ============================================================= */
+const payloadData = {
+  // AT&T Fiber Internet tiers
+  hyperspectral: { label: 'AT&T INTERNET 300',  swath: '300 Mbps', resLabel: 'PRICE / MO', res: '$50', power: '$0',   orbit: 'No contract', type: 'remote' },
+  multispectral: { label: 'AT&T INTERNET 500',  swath: '500 Mbps', resLabel: 'PRICE / MO', res: '$60', power: '$0',   orbit: 'No contract', type: 'remote' },
+  sar:           { label: 'AT&T INTERNET 1 GIG',swath: '1 Gbps',   resLabel: 'PRICE / MO', res: '$70', power: '$0',   orbit: 'No contract', type: 'remote' },
+  thermal:       { label: 'AT&T INTERNET 2 GIG',swath: '2 Gbps',   resLabel: 'PRICE / MO', res: '$90', power: '$0',   orbit: 'No contract', type: 'remote' },
+  vhr:           { label: 'AT&T INTERNET 5 GIG',swath: '5 Gbps',   resLabel: 'PRICE / MO', res: '$110', power: '$0',  orbit: 'No contract', type: 'remote' },
+  // AT&T Wireless plans
+  'ads-b':       { label: 'UNLIMITED STARTER',  swath: 'Unlimited',  resLabel: 'PRICE / LINE', res: '$35', power: '$0', orbit: 'No contract', type: 'conn' },
+  ais:           { label: 'UNLIMITED EXTRA',    swath: '75 GB HS',   resLabel: 'PRICE / LINE', res: '$45', power: '$0', orbit: 'No contract', type: 'conn' },
+  broadband:     { label: 'UNLIMITED PREMIUM',  swath: 'Unlimited HS', resLabel: 'PRICE / LINE', res: '$55', power: '$0', orbit: 'No contract', type: 'conn' },
+  sigint:        { label: 'FAMILY 4-LINE',      swath: '4 lines',    resLabel: 'TOTAL / MO',   res: '$140', power: '$0', orbit: 'No contract', type: 'conn' },
+  storeforward:  { label: 'PREPAID — NO CREDIT CHECK', swath: '15 GB', resLabel: 'PRICE / MO', res: '$29.99', power: '$0', orbit: 'No contract', type: 'conn' },
+};
+
+let activePayload = null;
+
+function selectPayload(key) {
+  const d = payloadData[key];
+  activePayload = d.label;
+
+  document.getElementById('payload-selected-name').textContent = d.label;
+  document.getElementById('tel-swath').textContent = d.swath;
+  document.getElementById('tel-res-label').textContent = d.resLabel;
+  document.getElementById('tel-res').textContent = d.res;
+  document.getElementById('tel-power').textContent = d.power;
+  document.getElementById('tel-orbit').textContent = d.orbit;
+  document.getElementById('term-payload').textContent = d.label;
+  document.getElementById('mod-payload').textContent = d.label;
+
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.pill[data-payload="${key}"]`).classList.add('active');
+
+  if (d.type === 'remote') pulsePayload();
+  else pulseAntenna();
+}
+
+document.querySelectorAll('.pill[data-payload]').forEach(pill => {
+  pill.addEventListener('click', () => selectPayload(pill.dataset.payload));
+});
+
+// Category switcher
+const catRemote = document.getElementById('cat-remote');
+const catConn = document.getElementById('cat-conn');
+const remotePills = document.getElementById('remote-pills');
+const connPills = document.getElementById('conn-pills');
+
+function setCategory(mode) {
+  if (mode === 'remote') {
+    remotePills.classList.remove('hidden');
+    connPills.classList.add('hidden');
+    catRemote.classList.add('bg-cyanAero/20', 'text-cyanAero');
+    catRemote.classList.remove('text-white/50');
+    catConn.classList.remove('bg-cyanAero/20', 'text-cyanAero');
+    catConn.classList.add('text-white/50');
+  } else {
+    remotePills.classList.add('hidden');
+    connPills.classList.remove('hidden');
+    catConn.classList.add('bg-blueAero/20', 'text-blueAero');
+    catConn.classList.remove('text-white/50');
+    catRemote.classList.remove('bg-cyanAero/20', 'text-cyanAero');
+    catRemote.classList.add('text-white/50');
+  }
+}
+catRemote.addEventListener('click', () => setCategory('remote'));
+catConn.addEventListener('click', () => setCategory('conn'));
+setCategory('remote');
+
+// Initialize with hyperspectral selected
+selectPayload('hyperspectral');
+
+/* =============================================================
+   UI: TABS (STEP 02)
+   ============================================================= */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('active', 'text-cyanAero');
+      b.classList.add('text-white/50');
+    });
+    btn.classList.add('active', 'text-cyanAero');
+    btn.classList.remove('text-white/50');
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+    document.getElementById('tab-' + tab).classList.remove('hidden');
+  });
+});
+
+// Laser uplink button
+document.getElementById('laser-uplink-btn').addEventListener('click', () => {
+  laserMat.opacity = 1.0;
+  pulseAntenna();
+});
+
+/* =============================================================
+   LIVE CHARTS (CANVAS)
+   ============================================================= */
+function makeChart(id, color, baseFn) {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  const data = Array(80).fill(0).map((_, i) => baseFn(i));
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    // grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 1;
+    for (let y = 0; y < 4; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, (y / 4) * h);
+      ctx.lineTo(w, (y / 4) * h);
+      ctx.stroke();
+    }
+    // line
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const max = Math.max(...data), min = Math.min(...data);
+    const rng = max - min || 1;
+    data.forEach((v, i) => {
+      const x = (i / (data.length - 1)) * w;
+      const y = h - ((v - min) / rng) * h * 0.85 - h * 0.05;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    // fill
+    ctx.lineTo(w, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fillStyle = color + '22';
+    ctx.fill();
+  }
+
+  function tick(i) {
+    data.shift();
+    data.push(baseFn(i));
+    draw();
+  }
+  return { tick, draw };
+}
+
+const chartSolar = makeChart('chart-solar', '#4A6EFF', i => 3.5 + Math.sin(i * 0.3) * 0.5 + Math.random() * 0.1);
+const chartBatt  = makeChart('chart-batt',  '#4A6EFF', i => 80 + Math.sin(i * 0.1) * 5 + Math.random() * 1);
+const chartAtt   = makeChart('chart-att',   '#4A6EFF', i => 0.02 + Math.sin(i * 0.5) * 0.01 + Math.random() * 0.005);
+
+let chartTick = 0;
+setInterval(() => {
+  chartTick++;
+  chartSolar.tick(chartTick);
+  chartBatt.tick(chartTick);
+  chartAtt.tick(chartTick);
+  document.getElementById('mon-solar').textContent = (3.5 + Math.sin(chartTick * 0.3) * 0.5 + Math.random() * 0.1).toFixed(2) + ' A';
+  document.getElementById('mon-batt').textContent  = (80 + Math.sin(chartTick * 0.1) * 5 + Math.random() * 1).toFixed(1) + '%';
+  document.getElementById('mon-att').textContent   = (0.02 + Math.sin(chartTick * 0.5) * 0.01).toFixed(3) + '°';
+}, 500);
+chartSolar.draw(); chartBatt.draw(); chartAtt.draw();
+
+/* =============================================================
+   TECHNOLOGY SLIDERS
+   ============================================================= */
+const charge = document.getElementById('charge-slider');
+const dod = document.getElementById('dod-slider');
+const data = document.getElementById('data-slider');
+const tx = document.getElementById('tx-slider');
+
+function updateTech() {
+  const c = parseFloat(charge.value);
+  const d = parseFloat(dod.value);
+  const dr = parseFloat(data.value);
+  const t = parseFloat(tx.value);
+
+  document.getElementById('charge-val').textContent = c.toFixed(1) + ' A';
+  document.getElementById('dod-val').textContent = d + '%';
+  document.getElementById('data-val').textContent = dr + ' Mbps';
+  document.getElementById('tx-val').textContent = t + ' dBm';
+
+  // Derived readouts
+  document.getElementById('eff-val').textContent = (28 + c * 0.75).toFixed(1) + '%';
+  document.getElementById('link-val').textContent = '+' + (t * 0.3 + 1).toFixed(1) + ' dB';
+  document.getElementById('thermal-val').textContent = '+' + Math.round(20 + c * 2) + '°C';
+  document.getElementById('dl-val').textContent = (dr * 0.38).toFixed(1) + ' GB';
+
+  // Visual: brighten solar wings
+  const intensity = 0.2 + (c / 10) * 0.6;
+  leftWing.children.forEach(ch => {
+    if (ch.children) ch.children.forEach(x => {
+      if (x.material && x.material.emissiveIntensity !== undefined) x.material.emissiveIntensity = intensity;
+    });
+  });
+  rightWing.children.forEach(ch => {
+    if (ch.children) ch.children.forEach(x => {
+      if (x.material && x.material.emissiveIntensity !== undefined) x.material.emissiveIntensity = intensity;
+    });
+  });
+}
+charge.addEventListener('input', updateTech);
+dod.addEventListener('input', updateTech);
+data.addEventListener('input', updateTech);
+tx.addEventListener('input', updateTech);
+updateTech();
+
+/* =============================================================
+   CONSTELLATION SLIDER & ODOMETER
+   ============================================================= */
+const satSlider = document.getElementById('constellation-slider');
+const satCountEl = document.getElementById('sat-count');
+const revisitEl = document.getElementById('revisit');
+const totalCostEl = document.getElementById('total-cost');
+const odoTrad = document.getElementById('odo-trad');
+const odoEso = document.getElementById('odo-eso');
+const odoBar = document.getElementById('odo-bar');
+
+function updateCostingUI() {
+  const n = parseInt(satSlider.value);
+  satCountEl.textContent = n;
+  // Revisit: 48h -> 2h as n goes 1 -> 24, roughly 48/n
+  const revisitH = Math.max(2, Math.round(48 / n));
+  revisitEl.innerHTML = revisitH + '<span class="text-xl">H</span>';
+  totalCostEl.textContent = (0.6 * n).toFixed(1);
+
+  // Odometer updates
+  const trad = Math.round(1840 - (n - 1) * 10);
+  const eso  = Math.max(14, Math.round(47 - (n - 1) * 1.4));
+  odoTrad.textContent = trad.toLocaleString();
+  odoEso.textContent = eso;
+  const pct = Math.max(1, (eso / trad) * 100 * 2);
+  odoBar.style.width = pct + '%';
+
+  // Modal updates
+  document.getElementById('mod-count').textContent = n;
+  document.getElementById('mod-revisit').textContent = revisitH + 'H';
+  document.getElementById('mod-cost').textContent = (0.6 * n).toFixed(1);
+}
+satSlider.addEventListener('input', updateCostingUI);
+updateCostingUI();
+
+/* =============================================================
+   COUNT-UP ANIMATIONS (Flight heritage)
+   ============================================================= */
+function animateCount(id, target, suffix = '+') {
+  const el = document.getElementById(id);
+  let current = 0;
+  const step = target / 60;
+  const int = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(int); }
+    el.textContent = Math.floor(current).toLocaleString() + suffix;
+  }, 20);
+}
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      animateCount('count-sats', 100);
+      animateCount('count-data', 500);
+      animateCount('count-years', 900);
+      io.disconnect();
+    }
+  });
+}, { threshold: 0.3 });
+io.observe(document.getElementById('heritage'));
+
+/* =============================================================
+   MODAL
+   ============================================================= */
+const modal = document.getElementById('mission-modal');
+document.getElementById('design-mission-btn').addEventListener('click', () => modal.classList.add('open'));
+document.querySelectorAll('.bg-cyanAero.text-obsidian').forEach(b => {
+  if (b.textContent.trim().startsWith('Design your mission')) {
+    b.addEventListener('click', () => modal.classList.add('open'));
+  }
+});
+document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('open'));
+modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+
+/* =============================================================
+   COPY BUTTON
+   ============================================================= */
+document.getElementById('copy-btn-1')?.addEventListener('click', (e) => {
+  navigator.clipboard?.writeText('curl -H "Authorization: Bearer $ES_TOKEN" https://api.broadway.net/v1/telemetry/latest');
+  e.target.textContent = 'COPIED!';
+  setTimeout(() => e.target.textContent = 'COPY', 1500);
+});
+
+/* =============================================================
+   INIT
+   ============================================================= */
+updateFromScroll();
+
+/* =============================================================
+   THEME TOGGLE — light / dark + Three.js scene adjustments
+   ============================================================= */
+const THEMES = {
+  dark: {
+    clear: 0x050507,
+    fog: 0x050507,
+    nebula: 0x060a18,
+    nebulaOpacity: 0.7,
+    starOpacity: 0.9,
+    globeColor: 0x071226,
+    globeEmissive: 0x0a2a4a,
+    globeEmissiveI: 0.35,
+    gridColor: 0x4A6EFF,
+    gridOpacity: 0.4,
+    atmoColor: 0x4A6EFF,
+    atmoIntensity: 1.2,
+    hazeColor: 0x4A6EFF,
+    hazeIntensity: 0.6,
+    ambient: 0x8aa0b8,
+    ambientI: 0.35,
+    sunI: 1.4,
+    rimCyanI: 2.0,
+    rimBlueI: 1.5,
+    orbitRingOpacity: 0.4,
+    continentOpacity: 0.95
+  },
+  light: {
+    clear: 0xf4f6fc,
+    fog: 0xf4f6fc,
+    nebula: 0xffffff,
+    nebulaOpacity: 0.0,
+    starOpacity: 0.0,
+    globeColor: 0x12229d,
+    globeEmissive: 0x4A6EFF,
+    globeEmissiveI: 0.08,
+    gridColor: 0x12229d,
+    gridOpacity: 0.6,
+    atmoColor: 0x12229d,
+    atmoIntensity: 0.45,
+    hazeColor: 0x4A6EFF,
+    hazeIntensity: 0.15,
+    ambient: 0xffffff,
+    ambientI: 0.9,
+    sunI: 0.9,
+    rimCyanI: 0.6,
+    rimBlueI: 0.5,
+    orbitRingOpacity: 0.55,
+    continentOpacity: 0.75
+  }
+};
+
+function applyThreeTheme(mode) {
+  const t = THEMES[mode] || THEMES.dark;
+  renderer.setClearColor(t.clear, 1);
+  scene.fog.color.setHex(t.fog);
+  nebulaMat.color.setHex(t.nebula);
+  nebulaMat.opacity = t.nebulaOpacity;
+  starMat.opacity = t.starOpacity;
+  globeMat.color.setHex(t.globeColor);
+  globeMat.emissive.setHex(t.globeEmissive);
+  globeMat.emissiveIntensity = t.globeEmissiveI;
+  wireMat.color.setHex(t.gridColor);
+  wireMat.opacity = t.gridOpacity;
+  atmosphereMat.uniforms.glowColor.value.setHex(t.atmoColor);
+  atmosphereMat.uniforms.intensity.value = t.atmoIntensity;
+  hazeMat.uniforms.glowColor.value.setHex(t.hazeColor);
+  hazeMat.uniforms.intensity.value = t.hazeIntensity;
+  ambient.color.setHex(t.ambient);
+  ambient.intensity = t.ambientI;
+  sun.intensity = t.sunI;
+  rimCyan.intensity = t.rimCyanI;
+  rimBlue.intensity = t.rimBlueI;
+  [orbitRing, orbitRing2, orbitRing3].forEach(r => {
+    r.material.opacity = t.orbitRingOpacity;
+  });
+  continentPts.material.opacity = t.continentOpacity;
+}
+
+function setTheme(mode) {
+  document.documentElement.setAttribute('data-theme', mode);
+  try { localStorage.setItem('theme', mode); } catch(e) {}
+  const icon = document.getElementById('theme-icon');
+  if (icon) {
+    icon.setAttribute('data-lucide', mode === 'light' ? 'sun' : 'moon');
+    lucide.createIcons();
+  }
+  applyThreeTheme(mode);
+}
+
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  setTheme(cur === 'dark' ? 'light' : 'dark');
+});
+
+// Initial sync (data-theme attribute was set pre-paint; now sync icon + 3D)
+setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Services &amp; Prices — Broadway Fast Internet</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        display: ['Space Grotesk', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['Inter', 'sans-serif'],
+      },
+      colors: {
+        obsidian: '#050507',
+        panel: '#0E1015',
+        brand: '#12229d',
+        brandBright: '#4A6EFF',
+        cyanAero: '#4A6EFF',
+        blueAero: '#12229d',
+      }
+    }
+  }
+}
+</script>
+
+<script>
+  (function(){
+    try {
+      var t = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch(e) { document.documentElement.setAttribute('data-theme','dark'); }
+  })();
+</script>
+
+<style>
+  :root {
+    --bg: #050507;
+    --text: #E5E7EB;
+    --glass-bg: rgba(14, 16, 21, 0.65);
+    --glass-strong-bg: rgba(14, 16, 21, 0.9);
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.1);
+    --scroll-track: #050507;
+    --scroll-thumb: #1a1d24;
+    --pill-bg: rgba(14,16,21,0.6);
+    --aurora:
+      radial-gradient(ellipse at 20% 20%, rgba(18,34,157,0.25), transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(74,110,255,0.18), transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(10,15,40,0.5), transparent 70%);
+  }
+  html[data-theme="light"] {
+    --bg: #f4f6fc;
+    --text: #0a0e1a;
+    --glass-bg: rgba(255, 255, 255, 0.78);
+    --glass-strong-bg: rgba(255, 255, 255, 0.92);
+    --border: rgba(18,34,157,0.14);
+    --border-strong: rgba(18,34,157,0.2);
+    --scroll-track: #e5e8f0;
+    --scroll-thumb: #c4cad9;
+    --pill-bg: rgba(255,255,255,0.75);
+    --aurora:
+      radial-gradient(ellipse at 20% 20%, rgba(74,110,255,0.18), transparent 55%),
+      radial-gradient(ellipse at 80% 80%, rgba(18,34,157,0.1), transparent 55%),
+      radial-gradient(ellipse at 50% 50%, rgba(240,245,255,0.6), transparent 70%);
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .glass-strong {
+    background: var(--glass-strong-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-strong);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .hairline { border: 1px solid var(--border); }
+  .hairline-b { border-bottom: 1px solid var(--border); }
+  .hairline-t { border-top: 1px solid var(--border); }
+  .glow-dot {
+    width: 6px; height: 6px;
+    background: #4A6EFF;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #4A6EFF;
+    display: inline-block;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .pulse-dot { animation: pulse 2s ease-in-out infinite; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--scroll-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 4px; }
+  html { scroll-behavior: smooth; }
+  .plan-card { transition: all 0.25s ease; }
+  .plan-card:hover { transform: translateY(-4px); border-color: #4A6EFF; }
+  /* Bg gradient aurora */
+  body::before {
+    content:'';
+    position: fixed;
+    inset: 0;
+    background: var(--aurora);
+    z-index: 0;
+    pointer-events: none;
+    transition: background 0.3s ease;
+  }
+  main, nav, footer { position: relative; z-index: 1; }
+
+  /* ===== LIGHT THEME TAILWIND OVERRIDES ===== */
+  html[data-theme="light"] body { background: var(--bg); color: var(--text); }
+  html[data-theme="light"] .text-white { color: #0a0e1a !important; }
+  html[data-theme="light"] .text-white\/90 { color: rgba(10,14,26,0.9) !important; }
+  html[data-theme="light"] .text-white\/80 { color: rgba(10,14,26,0.78) !important; }
+  html[data-theme="light"] .text-white\/70 { color: rgba(10,14,26,0.72) !important; }
+  html[data-theme="light"] .text-white\/60 { color: rgba(10,14,26,0.62) !important; }
+  html[data-theme="light"] .text-white\/50 { color: rgba(10,14,26,0.52) !important; }
+  html[data-theme="light"] .text-white\/40 { color: rgba(10,14,26,0.42) !important; }
+  html[data-theme="light"] .text-white\/30 { color: rgba(10,14,26,0.32) !important; }
+  html[data-theme="light"] .text-obsidian { color: #ffffff !important; }
+  html[data-theme="light"] .bg-black\/40 { background-color: rgba(255,255,255,0.7) !important; }
+  html[data-theme="light"] .bg-white\/5 { background-color: rgba(18,34,157,0.06) !important; }
+  html[data-theme="light"] .border-white\/10 { border-color: rgba(18,34,157,0.14) !important; }
+  html[data-theme="light"] .border-white\/5 { border-color: rgba(18,34,157,0.08) !important; }
+  /* Dark gradient CTA cards keep their colorful bg; only tweak children if needed */
+  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white,
+  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/80,
+  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/70,
+  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/60 { color: #ffffff !important; }
+  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/80 { color: rgba(255,255,255,0.8) !important; }
+  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/70 { color: rgba(255,255,255,0.7) !important; }
+  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/60 { color: rgba(255,255,255,0.6) !important; }
+  html[data-theme="light"] [style*="linear-gradient(135deg, #0a1555"] .text-white\/40 { color: rgba(255,255,255,0.5) !important; }
+
+  /* ===== BROADWAY LOGO (theme-aware color) ===== */
+  .broadway-logo { color: #4A6EFF; transition: color 0.3s ease; }
+  html[data-theme="light"] .broadway-logo { color: #12229d; }
+
+  /* ===== BROADWAY LOGO IMAGE (adapts per theme) ===== */
+  .broadway-img {
+    transition: filter 0.3s ease;
+    display: block;
+  }
+  html[data-theme="dark"] .broadway-img {
+    filter: invert(1) hue-rotate(180deg) brightness(1.05) saturate(1.1);
+  }
+  html[data-theme="light"] .broadway-img {
+    mix-blend-mode: multiply;
+  }
+
+  /* ===== THEME TOGGLE BUTTON ===== */
+  .theme-toggle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: var(--pill-bg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text);
+  }
+  .theme-toggle:hover {
+    border-color: #4A6EFF;
+    color: #4A6EFF;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="sticky top-0 left-0 w-full z-50 glass-strong hairline-b">
+  <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <div class="flex items-center gap-10">
+      <a href="index.html" class="flex items-center">
+        <img src="Broadway1.png" alt="Broadway Fast Internet" class="broadway-img h-14 w-auto" />
+      </a>
+      <div class="hidden md:flex items-center gap-7 text-sm">
+        <a href="index.html" class="hover:text-cyanAero transition">Home</a>
+        <a href="services.html" class="text-cyanAero">Services &amp; Prices</a>
+        <a href="#plans" class="hover:text-cyanAero transition">Plans</a>
+        <a href="#wireless" class="hover:text-cyanAero transition">Wireless</a>
+        <a href="#contact" class="hover:text-cyanAero transition">Contact</a>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="tel:6462985043" class="hidden md:flex hairline px-4 py-2 rounded-full text-sm font-mono hover:border-cyanAero transition items-center gap-2">
+        <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+        646-298-5043
+      </a>
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle light / dark theme">
+        <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+      </button>
+      <a href="tel:6462985043" class="bg-brand text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-brandBright transition flex items-center gap-2">
+        Call now
+        <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<section class="pt-24 pb-16">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    <div class="inline-flex items-center gap-2 pill mb-6 border border-white/10 rounded-full px-4 py-2 font-mono text-xs tracking-widest text-cyanAero">
+      <span class="glow-dot pulse-dot"></span>
+      AT&amp;T AUTHORIZED DEALER · NEW YORK
+    </div>
+    <h1 class="font-display font-bold text-5xl md:text-7xl uppercase leading-[0.95]">Services<br/><span class="text-cyanAero">&amp; Prices</span></h1>
+    <p class="text-white/60 mt-5 max-w-2xl mx-auto text-lg">All AT&amp;T Fiber Internet, Home Internet, and Wireless plans — with the real pricing you'll pay. Call <a href="tel:6462985043" class="text-cyanAero font-semibold hover:underline">646-298-5043</a> to check availability at your address.</p>
+
+    <!-- Quick stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-10 max-w-3xl mx-auto">
+      <div class="glass rounded-xl p-4">
+        <div class="font-mono text-[10px] text-white/40 tracking-widest">PLANS FROM</div>
+        <div class="font-display font-bold text-2xl text-cyanAero">$29.99</div>
+      </div>
+      <div class="glass rounded-xl p-4">
+        <div class="font-mono text-[10px] text-white/40 tracking-widest">UP TO</div>
+        <div class="font-display font-bold text-2xl text-cyanAero">5 GIG</div>
+      </div>
+      <div class="glass rounded-xl p-4">
+        <div class="font-mono text-[10px] text-white/40 tracking-widest">ACTIVATION</div>
+        <div class="font-display font-bold text-2xl text-cyanAero">24 HR</div>
+      </div>
+      <div class="glass rounded-xl p-4">
+        <div class="font-mono text-[10px] text-white/40 tracking-widest">CONTRACT</div>
+        <div class="font-display font-bold text-2xl text-cyanAero">NONE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES OFFERED -->
+<section class="py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <div class="font-mono text-xs text-cyanAero tracking-widest mb-3">WHAT WE OFFER</div>
+      <h2 class="font-display font-bold text-3xl md:text-4xl uppercase">Full-Service Sales &amp; Activation</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="glass rounded-2xl p-6">
+        <i data-lucide="map-pin" class="w-7 h-7 text-cyanAero mb-4"></i>
+        <div class="font-display font-bold text-lg uppercase">Availability Check</div>
+        <p class="text-white/60 text-sm mt-2">We check AT&amp;T Fiber &amp; Internet Air coverage at your address — free, no obligation.</p>
+      </div>
+      <div class="glass rounded-2xl p-6">
+        <i data-lucide="list-checks" class="w-7 h-7 text-cyanAero mb-4"></i>
+        <div class="font-display font-bold text-lg uppercase">Plan Comparison</div>
+        <p class="text-white/60 text-sm mt-2">We match your household size, usage, and budget to the right internet speed and wireless plan.</p>
+      </div>
+      <div class="glass rounded-2xl p-6">
+        <i data-lucide="plug-zap" class="w-7 h-7 text-cyanAero mb-4"></i>
+        <div class="font-display font-bold text-lg uppercase">Service Activation</div>
+        <p class="text-white/60 text-sm mt-2">Full account setup, equipment delivery, install scheduling — handled through authorized AT&amp;T dealer channels.</p>
+      </div>
+      <div class="glass rounded-2xl p-6">
+        <i data-lucide="layers" class="w-7 h-7 text-cyanAero mb-4"></i>
+        <div class="font-display font-bold text-lg uppercase">Bundle Optimization</div>
+        <p class="text-white/60 text-sm mt-2">Combine Internet + Wireless and unlock multi-service discounts automatically.</p>
+      </div>
+      <div class="glass rounded-2xl p-6">
+        <i data-lucide="router" class="w-7 h-7 text-cyanAero mb-4"></i>
+        <div class="font-display font-bold text-lg uppercase">Equipment Setup</div>
+        <p class="text-white/60 text-sm mt-2">AT&amp;T Wi-Fi 6 Gateway included. We walk you through self-install or schedule a tech.</p>
+      </div>
+      <div class="glass rounded-2xl p-6">
+        <i data-lucide="life-buoy" class="w-7 h-7 text-cyanAero mb-4"></i>
+        <div class="font-display font-bold text-lg uppercase">Billing &amp; Support</div>
+        <p class="text-white/60 text-sm mt-2">A local NY-based rep for autopay setup, bill questions, line transfers, and plan changes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NO CREDIT CHECK PROMO -->
+<section id="no-credit" class="py-10">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="rounded-3xl p-8 md:p-12 relative overflow-hidden" style="background: linear-gradient(135deg, #0a1555 0%, #12229d 50%, #4A6EFF 100%); border: 1px solid rgba(74,110,255,0.4);">
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <div class="font-mono text-xs tracking-widest text-white/80 mb-3">LIMITED TIME OFFER</div>
+          <h2 class="font-display font-bold text-4xl md:text-6xl text-white uppercase leading-[0.95]">
+            Fast Broadband<br/>Internet<br/>
+            <span class="text-white">$29<span class="text-cyanAero">.99</span></span><span class="text-2xl">/mo</span>
+          </h2>
+          <p class="text-white/80 mt-5 max-w-md">No credit check required. Qualifying residential service. Stream, work, game, connect — same AT&amp;T network, zero friction.</p>
+          <div class="mt-6 flex items-center gap-3 flex-wrap">
+            <a href="tel:6462985043" class="bg-white text-brand px-6 py-3 rounded-full font-semibold hover:bg-cyanAero hover:text-white transition flex items-center gap-2">
+              <i data-lucide="phone" class="w-4 h-4"></i> Call 646-298-5043
+            </a>
+            <a href="mailto:Broadwaypower25@gmail.com" class="bg-transparent border border-white/30 text-white px-6 py-3 rounded-full font-semibold hover:bg-white/10 transition">
+              Email us
+            </a>
+          </div>
+        </div>
+        <div class="glass-strong rounded-2xl p-6">
+          <div class="font-mono text-xs text-white/60 tracking-widest mb-3">BONUS INCLUDED</div>
+          <div class="font-display font-bold text-5xl text-cyanAero mb-2">Up to $200</div>
+          <div class="font-mono text-sm text-white/80 mb-4">VISA Reward Card upon signup</div>
+          <ul class="text-sm text-white/80 space-y-2">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero"></i> Fast speeds for streaming &amp; work</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero"></i> Game lag-free from home</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero"></i> No credit check required</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero"></i> Available via authorized dealers</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AT&T INTERNET PLANS -->
+<section id="plans" class="py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <div class="font-mono text-xs text-cyanAero tracking-widest mb-3">AT&amp;T FIBER INTERNET</div>
+      <h2 class="font-display font-bold text-3xl md:text-4xl uppercase">All Four Speed Tiers</h2>
+      <p class="text-white/60 mt-3 max-w-2xl mx-auto text-sm">Price shown is after $10/mo discount w/ eligible Autopay &amp; Paperless billing (w/in 2 bills). Limited availability. Price plus taxes &amp; fees.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- PLAN 300 -->
+      <div id="plan-300" class="plan-card glass rounded-2xl p-6 flex flex-col scroll-mt-24">
+        <div class="font-mono text-xs text-white/50 tracking-widest">AT&amp;T INTERNET 300</div>
+        <div class="font-display font-bold text-2xl mt-2">300Mbps speed</div>
+        <div class="mt-5">
+          <div class="font-mono text-xs text-white/40 line-through">$60.00/mo.</div>
+          <div class="font-display font-bold text-4xl text-white mt-1">$50<span class="text-lg text-white/50">.00/mo</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">plus taxes &amp; fees</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="globe" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Game, stream, and video chat with confidence.</li>
+          <li class="flex items-start gap-2"><i data-lucide="laptop" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Support your smart home devices.</li>
+          <li class="flex items-start gap-2"><i data-lucide="signal" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>AT&amp;T internet backup included for wireless customers.</li>
+        </ul>
+        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2">
+          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- PLAN 500 -->
+      <div id="plan-500" class="plan-card glass rounded-2xl p-6 flex flex-col scroll-mt-24">
+        <div class="font-mono text-xs text-white/50 tracking-widest">AT&amp;T INTERNET 500</div>
+        <div class="font-display font-bold text-2xl mt-2">500Mbps speed</div>
+        <div class="mt-5">
+          <div class="font-mono text-xs text-white/40 line-through">$75.00/mo.</div>
+          <div class="font-display font-bold text-4xl text-white mt-1">$60<span class="text-lg text-white/50">.00/mo</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">plus taxes &amp; fees</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="globe" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Level up your gaming with low lag.</li>
+          <li class="flex items-start gap-2"><i data-lucide="laptop" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Connect and control multiple smart devices with ease.</li>
+          <li class="flex items-start gap-2"><i data-lucide="signal" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>AT&amp;T internet backup included for wireless customers.</li>
+        </ul>
+        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2">
+          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- PLAN 1000 - FEATURED -->
+      <div id="plan-1000" class="plan-card relative rounded-2xl p-6 flex flex-col scroll-mt-24" style="background: linear-gradient(180deg, rgba(74,110,255,0.08), rgba(18,34,157,0.04)); border: 1px solid #4A6EFF; box-shadow: 0 0 40px rgba(74,110,255,0.25);">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand text-white font-mono text-[10px] tracking-widest px-3 py-1 rounded-full">MOST POPULAR</div>
+        <div class="font-mono text-xs text-cyanAero tracking-widest">AT&amp;T INTERNET 1000</div>
+        <div class="font-display font-bold text-2xl mt-2">Up to 1 GIG speed</div>
+        <div class="mt-5">
+          <div class="font-mono text-xs text-white/40">
+            <span class="font-mono text-xs bg-cyanAero/20 text-cyanAero px-2 py-0.5 rounded">Online only: $100 reward card</span>
+          </div>
+          <div class="font-mono text-xs text-white/40 line-through mt-2">$90.00/mo.</div>
+          <div class="font-display font-bold text-4xl text-white mt-1">$70<span class="text-lg text-white/50">.00/mo</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">plus taxes &amp; fees</div>
+        </div>
+        <ul class="text-sm text-white/80 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="globe" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>The speed to succeed for work and pro-level gaming.</li>
+          <li class="flex items-start gap-2"><i data-lucide="laptop" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Unleash the full potential of your smart home ecosystem.</li>
+          <li class="flex items-start gap-2"><i data-lucide="signal" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>AT&amp;T internet backup included for wireless customers.</li>
+        </ul>
+        <a href="tel:6462985043" class="mt-6 w-full bg-cyanAero text-obsidian py-3 rounded-full font-semibold text-sm hover:bg-white transition flex items-center justify-center gap-2">
+          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- PLAN 5000 -->
+      <div id="plan-5000" class="plan-card glass rounded-2xl p-6 flex flex-col scroll-mt-24">
+        <div class="font-mono text-xs text-white/50 tracking-widest">AT&amp;T INTERNET 5000</div>
+        <div class="font-display font-bold text-2xl mt-2">Up to 5 GIG speed</div>
+        <div class="mt-5">
+          <div class="font-mono text-xs text-white/40">
+            <span class="font-mono text-xs bg-cyanAero/20 text-cyanAero px-2 py-0.5 rounded">Online only: $100 reward card</span>
+          </div>
+          <div class="font-mono text-xs text-white/40 line-through mt-2">$135.00/mo.</div>
+          <div class="font-display font-bold text-4xl text-white mt-1">$110<span class="text-lg text-white/50">.00/mo</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">plus taxes &amp; fees</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="globe" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Experience cutting-edge technologies beyond the internet.</li>
+          <li class="flex items-start gap-2"><i data-lucide="laptop" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Supports the latest gadgets with unmatched efficiency.</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>Maximum speed for truly immersive experiences.</li>
+          <li class="flex items-start gap-2"><i data-lucide="signal" class="w-4 h-4 text-cyanAero flex-shrink-0 mt-0.5"></i>AT&amp;T internet backup included for wireless customers.</li>
+        </ul>
+        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition flex items-center justify-center gap-2">
+          Shop now <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Optional add-ons note -->
+    <div class="mt-8 glass rounded-xl p-6 flex items-start gap-4">
+      <i data-lucide="plus-circle" class="w-6 h-6 text-cyanAero flex-shrink-0 mt-1"></i>
+      <div>
+        <div class="font-display font-bold text-lg uppercase">Optional Add-on: AT&amp;T All-Fi Pro</div>
+        <div class="text-white/60 text-sm mt-1">Advanced mesh-Wi-Fi coverage for larger homes — $25.00/mo plus taxes. Ask us when you call.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AT&T WIRELESS PLANS -->
+<section id="wireless" class="py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <div class="font-mono text-xs text-cyanAero tracking-widest mb-3">AT&amp;T WIRELESS</div>
+      <h2 class="font-display font-bold text-3xl md:text-4xl uppercase">Unlimited &amp; Family Plans</h2>
+      <p class="text-white/60 mt-3 max-w-2xl mx-auto text-sm">Prices below are per-line on 4-line unlimited plans. Multi-line bundling discounts applied. Call for a precise quote based on your line count.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="plan-card glass rounded-2xl p-6 flex flex-col">
+        <div class="font-mono text-xs text-white/50 tracking-widest">UNLIMITED STARTER</div>
+        <div class="font-display font-bold text-xl mt-2">Entry Unlimited</div>
+        <div class="mt-5">
+          <div class="font-display font-bold text-4xl text-white">$35<span class="text-lg text-white/50">/line/mo</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">4 lines · plus taxes &amp; fees</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Unlimited talk, text &amp; data</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>5G access included</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Standard-definition streaming</li>
+        </ul>
+        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2">Call to activate</a>
+      </div>
+
+      <div class="plan-card rounded-2xl p-6 flex flex-col" style="background: linear-gradient(180deg, rgba(74,110,255,0.08), rgba(18,34,157,0.04)); border: 1px solid #4A6EFF;">
+        <div class="font-mono text-xs text-cyanAero tracking-widest">UNLIMITED EXTRA</div>
+        <div class="font-display font-bold text-xl mt-2">Most Popular</div>
+        <div class="mt-5">
+          <div class="font-display font-bold text-4xl text-white">$45<span class="text-lg text-white/50">/line/mo</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">4 lines · plus taxes &amp; fees</div>
+        </div>
+        <ul class="text-sm text-white/80 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>75 GB high-speed data</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>5G+ in select markets</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>25 GB hotspot included</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>HD video streaming</li>
+        </ul>
+        <a href="tel:6462985043" class="mt-6 w-full bg-cyanAero text-obsidian py-3 rounded-full font-semibold text-sm hover:bg-white transition text-center flex items-center justify-center gap-2">Call to activate</a>
+      </div>
+
+      <div class="plan-card glass rounded-2xl p-6 flex flex-col">
+        <div class="font-mono text-xs text-white/50 tracking-widest">UNLIMITED PREMIUM</div>
+        <div class="font-display font-bold text-xl mt-2">Premium Unlimited</div>
+        <div class="mt-5">
+          <div class="font-display font-bold text-4xl text-white">$55<span class="text-lg text-white/50">/line/mo</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">4 lines · plus taxes &amp; fees</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Unlimited premium high-speed</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>60 GB hotspot included</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>5G+ nationwide</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Int'l roaming perks</li>
+        </ul>
+        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2">Call to activate</a>
+      </div>
+
+      <div class="plan-card glass rounded-2xl p-6 flex flex-col md:col-span-2 lg:col-span-1">
+        <div class="font-mono text-xs text-white/50 tracking-widest">PREPAID</div>
+        <div class="font-display font-bold text-xl mt-2">No Credit Check</div>
+        <div class="mt-5">
+          <div class="font-display font-bold text-4xl text-white">$29.99<span class="text-lg text-white/50">/mo</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">single line · includes taxes</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>No credit check required</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>15 GB high-speed data</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Unlimited talk &amp; text</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Bring your own device OK</li>
+        </ul>
+        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2">Call to activate</a>
+      </div>
+
+      <div class="plan-card glass rounded-2xl p-6 flex flex-col">
+        <div class="font-mono text-xs text-white/50 tracking-widest">FAMILY 4-LINE</div>
+        <div class="font-display font-bold text-xl mt-2">Save per Line</div>
+        <div class="mt-5">
+          <div class="font-display font-bold text-4xl text-white">$140<span class="text-lg text-white/50">/mo total</span></div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">4 lines on Unlimited Starter</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>$35/line effective price</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Shared 5G nationwide access</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Up to 10 lines eligible</li>
+        </ul>
+        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2">Call to activate</a>
+      </div>
+
+      <div class="plan-card glass rounded-2xl p-6 flex flex-col">
+        <div class="font-mono text-xs text-white/50 tracking-widest">BUSINESS</div>
+        <div class="font-display font-bold text-xl mt-2">AT&amp;T Business Mobile</div>
+        <div class="mt-5">
+          <div class="font-display font-bold text-4xl text-white">Custom</div>
+          <div class="font-mono text-[10px] text-white/40 mt-1">quoted by line count</div>
+        </div>
+        <ul class="text-sm text-white/70 mt-5 space-y-2 flex-1">
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Business-grade priority data</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Device financing options</li>
+          <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyanAero mt-0.5"></i>Dedicated account rep</li>
+        </ul>
+        <a href="tel:6462985043" class="mt-6 w-full bg-brand text-white py-3 rounded-full font-semibold text-sm hover:bg-brandBright transition text-center flex items-center justify-center gap-2">Get a quote</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUNDLE SAVINGS -->
+<section class="py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="glass rounded-3xl p-8 md:p-12 text-center">
+      <div class="font-mono text-xs text-cyanAero tracking-widest mb-3">BUNDLE &amp; SAVE</div>
+      <h2 class="font-display font-bold text-3xl md:text-4xl uppercase">Internet + Wireless Together</h2>
+      <p class="text-white/60 mt-4 max-w-2xl mx-auto">Combine any AT&amp;T Fiber plan with an AT&amp;T Wireless Unlimited plan and automatically unlock bundle savings — plus AT&amp;T Internet Backup is included free. If your fiber goes down, your wireless data steps up.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+        <div class="hairline rounded-xl p-6">
+          <i data-lucide="shield" class="w-7 h-7 text-cyanAero mx-auto mb-3"></i>
+          <div class="font-display font-bold text-lg">Internet Backup Free</div>
+          <div class="text-white/60 text-sm mt-2">Wireless kicks in if fiber drops — zero config.</div>
+        </div>
+        <div class="hairline rounded-xl p-6">
+          <i data-lucide="percent" class="w-7 h-7 text-cyanAero mx-auto mb-3"></i>
+          <div class="font-display font-bold text-lg">Multi-Line Discounts</div>
+          <div class="text-white/60 text-sm mt-2">Automatically applied as you add wireless lines.</div>
+        </div>
+        <div class="hairline rounded-xl p-6">
+          <i data-lucide="receipt" class="w-7 h-7 text-cyanAero mx-auto mb-3"></i>
+          <div class="font-display font-bold text-lg">One Bill</div>
+          <div class="text-white/60 text-sm mt-2">Internet + wireless on a single AT&amp;T statement.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="rounded-3xl p-8 md:p-12" style="background: linear-gradient(135deg, #0a1555 0%, #12229d 100%);">
+      <div class="grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <div class="font-mono text-xs text-white/70 tracking-widest mb-3">GET STARTED</div>
+          <h2 class="font-display font-bold text-4xl md:text-5xl text-white uppercase leading-[0.95]">Call us. Get a quote.<br/>Get online.</h2>
+          <p class="text-white/80 mt-5 max-w-md">Have a specific plan in mind, or not sure which fits? Either way — one call, no hold music, no sales script.</p>
+        </div>
+        <div class="glass-strong rounded-2xl p-8 space-y-5">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-cyanAero/20 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="phone" class="w-5 h-5 text-cyanAero"></i>
+            </div>
+            <div>
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">PHONE</div>
+              <a href="tel:6462985043" class="font-display font-bold text-2xl text-white hover:text-cyanAero transition">646-298-5043</a>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-cyanAero/20 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="mail" class="w-5 h-5 text-cyanAero"></i>
+            </div>
+            <div>
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">EMAIL</div>
+              <a href="mailto:Broadwaypower25@gmail.com" class="font-display font-bold text-lg text-white hover:text-cyanAero transition break-all">Broadwaypower25@gmail.com</a>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-cyanAero/20 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="map-pin" class="w-5 h-5 text-cyanAero"></i>
+            </div>
+            <div>
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">LOCATION</div>
+              <div class="font-display font-bold text-lg text-white">Bronx, New York, USA</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-cyanAero/20 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="clock" class="w-5 h-5 text-cyanAero"></i>
+            </div>
+            <div>
+              <div class="font-mono text-[10px] text-white/40 tracking-widest">HOURS</div>
+              <div class="font-display font-bold text-lg text-white">Mon – Sun · 9A – 9P EST</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="py-14 glass hairline-t">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid md:grid-cols-3 gap-10 mb-10">
+      <div>
+        <div class="mb-3">
+          <img src="Broadway1.png" alt="Broadway Fast Internet" class="broadway-img h-24 w-auto" />
+        </div>
+        <p class="text-white/50 text-sm max-w-sm">Residential internet &amp; wireless sales through authorized AT&amp;T dealer channels in New York.</p>
+      </div>
+      <div>
+        <div class="font-mono text-xs text-white/40 tracking-widest mb-4">LINKS</div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="index.html" class="hover:text-cyanAero">Home</a></li>
+          <li><a href="services.html" class="hover:text-cyanAero">Services &amp; Prices</a></li>
+          <li><a href="#plans" class="hover:text-cyanAero">Internet Plans</a></li>
+          <li><a href="#wireless" class="hover:text-cyanAero">Wireless Plans</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-mono text-xs text-white/40 tracking-widest mb-4">CONTACT</div>
+        <ul class="space-y-2 text-sm font-mono">
+          <li class="flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-cyanAero"></i><a href="tel:6462985043" class="hover:text-cyanAero">646-298-5043</a></li>
+          <li class="flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-cyanAero"></i><a href="mailto:Broadwaypower25@gmail.com" class="hover:text-cyanAero break-all">Broadwaypower25@gmail.com</a></li>
+          <li class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-cyanAero"></i>Bronx, New York, USA</li>
+        </ul>
+      </div>
+    </div>
+    <div class="hairline-t pt-6 flex flex-col md:flex-row items-center justify-between gap-3 font-mono text-xs text-white/40 tracking-widest">
+      <div>© 2026 BROADWAY POWER LLC · AUTHORIZED AT&amp;T DEALER</div>
+      <div class="flex items-center gap-5">
+        <a class="hover:text-cyanAero">PRIVACY</a>
+        <a class="hover:text-cyanAero">TERMS</a>
+        <a class="hover:text-cyanAero">COOKIES</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+lucide.createIcons();
+
+/* Theme toggle */
+function setTheme(mode) {
+  document.documentElement.setAttribute('data-theme', mode);
+  try { localStorage.setItem('theme', mode); } catch(e) {}
+  const icon = document.getElementById('theme-icon');
+  if (icon) {
+    icon.setAttribute('data-lucide', mode === 'light' ? 'sun' : 'moon');
+    lucide.createIcons();
+  }
+}
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  setTheme(cur === 'dark' ? 'light' : 'dark');
+});
+setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+</script>
+</body>
+</html>
