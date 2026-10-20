@@ -395,6 +395,32 @@ tailwind.config = {
   .broadway-logo { color: #4A6EFF; transition: color 0.3s ease; }
   html[data-theme="light"] .broadway-logo { color: #12229d; }
 
+  /* ===== LIGHT-MODE BUTTON FIXES ===== */
+  /* Primary brand buttons: keep WHITE text in light mode (global text-white flip would otherwise make it unreadable) */
+  html[data-theme="light"] a.bg-brand,
+  html[data-theme="light"] button.bg-brand,
+  html[data-theme="light"] a.bg-brand *,
+  html[data-theme="light"] button.bg-brand * {
+    color: #ffffff !important;
+  }
+  /* Bright-blue buttons with dark text: keep text dark (reverse the obsidian→white flip) */
+  html[data-theme="light"] a.bg-cyanAero.text-obsidian,
+  html[data-theme="light"] button.bg-cyanAero.text-obsidian,
+  html[data-theme="light"] a.bg-cyanAero.text-obsidian *,
+  html[data-theme="light"] button.bg-cyanAero.text-obsidian * {
+    color: #050507 !important;
+  }
+  /* Outlined / hairline rounded buttons: subtle light-gray fill in light mode */
+  html[data-theme="light"] a.hairline.rounded-full,
+  html[data-theme="light"] button.hairline.rounded-full {
+    background-color: rgba(226, 232, 240, 0.6);
+  }
+  html[data-theme="light"] a.hairline.rounded-full:hover,
+  html[data-theme="light"] button.hairline.rounded-full:hover {
+    background-color: rgba(203, 213, 225, 0.85);
+    border-color: rgba(18, 34, 157, 0.3);
+  }
+
   /* ===== BROADWAY LOGO IMAGE (adapts per theme) ===== */
   .broadway-img {
     transition: filter 0.3s ease;
